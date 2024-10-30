@@ -1,11 +1,20 @@
 package main
 
-import "fmt"
+import (
+	// "fmt"
+	"os"
 
-func OpeningMessage() string {
-	return "The first Go Code!"
+	"github.com/bbland1/goDo/cmd"
+)
+
+func openingMessage() string {
+	return "Welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys."
 }
 
 func main() {
-	fmt.Println(OpeningMessage())
+	if len(os.Args) < 2 {
+		cmd.DisplayGreeting()
+	}
+
+	switch command
 }
