@@ -1,3 +1,3 @@
-module github.com/bbland1/cli-todo
+module github.com/bbland1/goDo
 
 go 1.23.2
