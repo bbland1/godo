@@ -14,10 +14,10 @@ func TestDisplayGreeting(t *testing.T) {
 }
 
 func TestDisplayUsage(t *testing.T) {
-	got := GetHelpMessage()
+	got := GetUserManual()
 	want := `
-
-usage: goDo command [options]
+usage: 
+	goDo [command] [options]
 
 options:
 	-h, -help	used to get more information about a command
@@ -25,6 +25,7 @@ options:
 commands:
 	help	show this message with an overview of all options and commands
 
+use "goDo [command] -help" for more information about a command
 `
 
 	if got != want {

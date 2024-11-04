@@ -2,13 +2,13 @@ package cmd
 
 import "fmt"
 
-var greeting = "Welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys."
+var greeting = "welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys"
 
-var unknown = "You have entered an unknown command please try again."
+var unknown = "you have entered an unknown command please try again"
 
-var helpMessage = `
-
-usage: goDo command [options]
+var userManual = `
+usage: 
+	goDo [command] [options]
 
 options:
 	-h, -help	used to get more information about a command
@@ -16,10 +16,11 @@ options:
 commands:
 	help	show this message with an overview of all options and commands
 
+use "goDo [command] -help" for more information about a command
 `
 
-func GetHelpMessage() string {
-	return helpMessage
+func GetUserManual() string {
+	return userManual
 }
 
 func GetGreeting() string {
@@ -30,8 +31,8 @@ func GetUnknown() string {
 	return unknown
 }
 
-func DisplayHelpMessage() {
-	fmt.Println(GetHelpMessage())
+func DisplayUserManual() {
+	fmt.Println(GetUserManual())
 }
 
 func DisplayGreeting() {

@@ -1,7 +1,8 @@
 package main
 
 import (
-	// "fmt"
+	"flag"
+	"fmt"
 	"os"
 
 	"github.com/bbland1/goDo/cmd"
@@ -12,12 +13,30 @@ func openingMessage() string {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		cmd.DisplayGreeting()
+
+	flag.Usage = func() {
+		cmd.DisplayUserManual()
 	}
 
-	switch os.Args[1] {
-	case "help":
-		cmd.DisplayHelpMessage()
+	helpFlag := flag.Bool("help", false, "show help message")
+
+	flag.Parse()
+
+	if len(os.Args) < 2 || *helpFlag {
+		cmd.DisplayUserManual()
+		os.Exit(0)
 	}
+
+	command := os.Args[1]
+
+
+	switch command {
+	case "help":
+		cmd.DisplayUserManual()
+	default:
+		fmt.Printf("unknown command passed to goDo: %s\n\n", command)
+		flag.Usage()
+		os.Exit(1)
+	}
+
 }
