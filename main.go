@@ -16,5 +16,8 @@ func main() {
 		cmd.DisplayGreeting()
 	}
 
-	switch command
+	switch os.Args[1] {
+	case "help":
+		cmd.DisplayHelpMessage()
+	}
 }

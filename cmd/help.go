@@ -6,7 +6,7 @@ var greeting = "Welcome to goDo your todo list in the terminal allowing you to k
 
 var unknown = "You have entered an unknown command please try again."
 
-var usage = `
+var helpMessage = `
 
 usage: goDo command [options]
 
@@ -17,8 +17,9 @@ commands:
 	help	show this message with an overview of all options and commands
 
 `
-func GetUsage() string {
-	return usage
+
+func GetHelpMessage() string {
+	return helpMessage
 }
 
 func GetGreeting() string {
@@ -29,8 +30,8 @@ func GetUnknown() string {
 	return unknown
 }
 
-func DisplayUsage() {
-	fmt.Println(GetUsage())
+func DisplayHelpMessage() {
+	fmt.Println(GetHelpMessage())
 }
 
 func DisplayGreeting() {

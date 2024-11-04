@@ -14,7 +14,7 @@ func TestDisplayGreeting(t *testing.T) {
 }
 
 func TestDisplayUsage(t *testing.T) {
-	got := GetUsage()
+	got := GetHelpMessage()
 	want := `
 
 usage: goDo command [options]
