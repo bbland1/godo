@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"strings"
+
 	"github.com/bbland1/goDo/cmd"
 )
-
-func openingMessage() string {
-	return "Welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys."
-}
 
 func main() {
 
@@ -29,6 +27,7 @@ func main() {
 
 	command := os.Args[1]
 
+	commandHelp := len(os.Args) > 2 && strings.HasPrefix(os.Args[2], "-h")
 
 	switch command {
 	case "help":

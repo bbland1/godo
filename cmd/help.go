@@ -15,6 +15,7 @@ options:
 	
 commands:
 	help	show this message with an overview of all options and commands
+	add	add a new itm to your todo list
 
 use "goDo [command] -help" for more information about a command
 `
