@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -15,15 +14,20 @@ func main() {
 		os.Exit(0)
 	}
 
-	command := os.Args[1]
+	var command *cmd.Command
 
-	switch command {
+	passedCommand := os.Args[1]
+	passedArgs := os.Args[2:]
+
+	switch passedCommand {
 	case "help":
-		cmd.DisplayUserManual()
+		command = cmd.NewHelpCommand()
 	default:
-		fmt.Printf("unknown command passed to goDo: %s\n\n", command)
-		flag.Usage()
+		fmt.Printf("unknown command passed to goDo: %s\n\n", passedCommand)
 		os.Exit(1)
 	}
+
+	command.Init(passedArgs)
+	command.Run()
 
 }
