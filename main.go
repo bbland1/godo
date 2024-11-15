@@ -5,29 +5,17 @@ import (
 	"fmt"
 	"os"
 
-	// "strings"
-
 	"github.com/bbland1/goDo/cmd"
 )
 
 func main() {
 
-	flag.Usage = func() {
-		cmd.DisplayUserManual()
-	}
-
-	helpFlag := flag.Bool("help", false, "show help message")
-
-	flag.Parse()
-
-	if len(os.Args) < 2 || *helpFlag {
-		cmd.DisplayUserManual()
+	if len(os.Args) < 2 {
+		cmd.DisplayGreeting()
 		os.Exit(0)
 	}
 
 	command := os.Args[1]
-
-	// commandHelp := len(os.Args) > 2 && strings.HasPrefix(os.Args[2], "-h")
 
 	switch command {
 	case "help":

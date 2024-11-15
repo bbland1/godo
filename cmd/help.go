@@ -1,12 +1,22 @@
 package cmd
 
-import "fmt"
+import (
+	"flag"
+	"fmt"
+)
 
-var greeting = "welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys"
+// The message that is displayed when the app starts with no commands passed
+const Greeting = `
+welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys
 
-var unknown = "you have entered an unknown command please try again"
+to learn more about how to use:
+	goDo help`
 
-var userManual = `
+// The message that is displayed when the an Unknown command is passed to the app
+const Unknown = "you have entered an unknown command please try again"
+
+// The base help message for the app, showing an overview of how it works
+const UserManual = `
 usage: 
 	goDo [command] [options]
 
@@ -17,29 +27,28 @@ commands:
 	help	show this message with an overview of all options and commands
 	add	add a new itm to your todo list
 
-use "goDo [command] -help" for more information about a command
-`
+use "goDo [command] -help" for more information about a command`
 
-func GetUserManual() string {
-	return userManual
-}
-
-func GetGreeting() string {
-	return greeting
-}
-
-func GetUnknown() string {
-	return unknown
-}
-
+// Prints the UserManual to the terminal to show user how to use app
 func DisplayUserManual() {
-	fmt.Println(GetUserManual())
+	fmt.Println(UserManual)
 }
 
+// Prints the welcome message to the terminal when the app is called with no commands passed
 func DisplayGreeting() {
-	fmt.Println(GetGreeting())
+	fmt.Println(Greeting)
 }
 
+// Prints an unknown message to the terminal when a command not programmed is passed
 func DisplayUnknown() {
-	fmt.Println(GetUnknown())
+	fmt.Println(Unknown)
+}
+
+func NewHelpCommand() *Command {
+	return &Command{
+		flags: flag.NewFlagSet("help", flag.ExitOnError),
+		Execute: func(cmd *Command, args []string) {
+			DisplayUserManual()
+		},
+	}
 }
