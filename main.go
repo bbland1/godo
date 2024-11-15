@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"strings"
+	// "strings"
 
 	"github.com/bbland1/goDo/cmd"
 )
@@ -27,7 +27,7 @@ func main() {
 
 	command := os.Args[1]
 
-	commandHelp := len(os.Args) > 2 && strings.HasPrefix(os.Args[2], "-h")
+	// commandHelp := len(os.Args) > 2 && strings.HasPrefix(os.Args[2], "-h")
 
 	switch command {
 	case "help":
