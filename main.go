@@ -7,6 +7,10 @@ import (
 	"github.com/bbland1/goDo/cmd"
 )
 
+func Execute(args []string) {
+
+}
+
 func main() {
 
 	if len(os.Args) < 2 {
@@ -30,4 +34,13 @@ func main() {
 	command.Init(passedArgs)
 	command.Run()
 
+}
+
+func usageAndExit(msg string, code int) {
+	if msg != "" {
+		fmt.Fprint(os.Stderr, msg)
+		fmt.Fprintln(os.Stderr)
+	}
+
+	os.Exit(code)
 }

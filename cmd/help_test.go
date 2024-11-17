@@ -6,8 +6,12 @@ import (
 
 func TestDisplayGreeting(t *testing.T) {
 	got := GetGreeting()
-	want := "Welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys."
+	want := `
+welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys
 
+to learn more about how to use:
+	goDo help
+`
 	if got != want {
 		t.Errorf("got %q want %q", got, want)
 	}
@@ -35,7 +39,7 @@ use "goDo [command] -help" for more information about a command
 
 func TestDisplayUnknown(t *testing.T) {
 	got := GetUnknown()
-	want := "You have entered an unknown command please try again."
+	want := "you have entered an unknown command please try again"
 
 	if got != want {
 		t.Errorf("got %q want %q", got, want)
