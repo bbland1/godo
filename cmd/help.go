@@ -6,18 +6,13 @@ import (
 )
 
 // The message that is displayed when the app starts with no commands passed
-const Greeting = `
-welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys
+const Greeting = `welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys
 
 to learn more about how to use:
 	goDo help`
 
-// The message that is displayed when the an Unknown command is passed to the app
-const Unknown = "you have entered an unknown command please try again"
-
 // The base help message for the app, showing an overview of how it works
-const UserManual = `
-usage: 
+const UserManual = `usage: 
 	goDo [command] [options]
 
 options:
@@ -39,11 +34,7 @@ func DisplayGreeting() {
 	fmt.Println(Greeting)
 }
 
-// Prints an unknown message to the terminal when a command not programmed is passed
-func DisplayUnknown() {
-	fmt.Println(Unknown)
-}
-
+// NewHelpCommand is called to pull up the usage or userManual of how to use goDo
 func NewHelpCommand() *Command {
 	return &Command{
 		flags: flag.NewFlagSet("help", flag.ExitOnError),
