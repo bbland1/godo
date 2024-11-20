@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	// "fmt"
 	"bytes"
 	"os"
 	"testing"
 )
 
-// TestDisplayUserManual tests if DisplayUserManual prints the correct output.
 func TestDisplayUserManual(t *testing.T) {
 	expectedOutput := UserManual + "\n"
 
@@ -44,7 +42,6 @@ func TestDisplayUserManual(t *testing.T) {
 
 }
 
-// TestDisplayGreeting tests if DisplayGreeting prints the correct output.
 func TestDisplayGreeting(t *testing.T) {
 	expectedOutput := Greeting + "\n"
 
@@ -81,7 +78,6 @@ func TestDisplayGreeting(t *testing.T) {
 
 }
 
-// TestHelpCommandFlag tests if the help command for the application is properly set as a flag
 func TestHelpCommandFlag(t *testing.T) {
 	helpCommand := NewHelpCommand()
 
@@ -90,7 +86,6 @@ func TestHelpCommandFlag(t *testing.T) {
 	}
 }
 
-// TestHelpCommandOutput tests if the help command properly prints the UserManual when Executed.
 func TestHelpCommandOutput(t *testing.T) {
 	helpCommand := NewHelpCommand()
 
