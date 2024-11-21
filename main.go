@@ -2,23 +2,24 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/bbland1/goDo/cmd"
 )
 
-func usageAndExit(msg string, code int) int {
+func usageAndExit(w io.Writer, msg string, code int) int {
 	if msg != "" {
-		fmt.Fprint(os.Stderr, msg)
-		fmt.Fprintln(os.Stderr)
+		fmt.Fprint(w, msg)
+		fmt.Fprintln(w)
 	}
 
 	return code
 }
 
-func runAppLogic(args []string) int {
+func runAppLogic(w io.Writer, args []string) int {
 	if len(args) < 2 {
-		cmd.DisplayGreeting()
+		cmd.DisplayGreeting(w)
 		return 0
 	}
 
@@ -29,9 +30,9 @@ func runAppLogic(args []string) int {
 
 	switch passedCommand {
 	case "help":
-		command = cmd.NewHelpCommand()
+		command = cmd.NewHelpCommand(w)
 	default:
-		usageAndExit(fmt.Sprintf("unknown command passed to goDo: %s\n", passedCommand), 1)
+		usageAndExit(w, fmt.Sprintf("unknown command passed to goDo: %s\n", passedCommand), 1)
 	}
 
 	if command == nil {
@@ -44,7 +45,7 @@ func runAppLogic(args []string) int {
 }
 
 func main() {
-	exitCode := runAppLogic(os.Args)
+	exitCode := runAppLogic(os.Stdout, os.Args)
 
 	os.Exit(exitCode)
 

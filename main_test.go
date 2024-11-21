@@ -3,52 +3,62 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"strings"
 
 	// "os"
-	"os/exec"
+	"strings"
+
+	// "os/exec"
 	"testing"
 
 	"github.com/bbland1/goDo/cmd"
 )
 
-func TestNoArgs(t *testing.T) {
-	testCmd := exec.Command("go", "run", "main.go")
-	var stdout bytes.Buffer
-	testCmd.Stdout = &stdout
+func TestUsageAndExit(t *testing.T) {
+	var buffer bytes.Buffer
 
-	err := testCmd.Run()
-	if err != nil {
-		t.Errorf("Command execution failed: %v", err)
+	exitCode := usageAndExit(&buffer, "this is a test error message", 3)
+
+	if exitCode != 3 {
+		t.Errorf("Exit code of 3 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "this is a test error message"
+
+	output := strings.TrimSpace(buffer.String())
+
+	if !strings.Contains(output, expectedOutput) {
+		t.Errorf("Expected error message to contain %q, but got %q", expectedOutput, output)
+	}
+}
+
+func TestNoArgs(t *testing.T) {
+	var buffer bytes.Buffer
+
+	exitCode := runAppLogic(&buffer, []string{"main"})
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
 	}
 
 	expectedOutput := cmd.Greeting
-	output := strings.TrimSpace(stdout.String())
+	output := strings.TrimSpace(buffer.String())
 	if output != expectedOutput {
-		t.Errorf("Expected output: %q, but got: %q", expectedOutput, output)
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
 	}
 }
 
 func TestUnknownCommand(t *testing.T) {
-	testCmd := exec.Command("go", "run", "main.go", "unknown")
-	var stderr bytes.Buffer
-	testCmd.Stderr = &stderr
+	var buffer bytes.Buffer
 
-	err := testCmd.Run()
+	exitCode := runAppLogic(&buffer, []string{"main", "unknown"})
 
-	if exitErr, ok := err.(*exec.ExitError); ok {
-		if exitErr.ExitCode() != 1 {
-			t.Errorf("Expected exit code 1, but got: %d", exitErr.ExitCode())
-		}
-	} else if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	} else {
-		t.Errorf("Expected non-zero exit code for unknown command, but command succeeded")
+	if exitCode != 1 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
 	}
 
-	expectedError := fmt.Sprintf("unknown command passed to goDo: %s\n", "unknown")
-	actualError := stderr.String()
-	if !strings.Contains(actualError, expectedError) {
-		t.Errorf("Expected output: %q, but got: %q", expectedError, stderr.String())
+	expectedOutput := fmt.Sprintf("unknown command passed to goDo: %s", "unknown")
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
 	}
 }
