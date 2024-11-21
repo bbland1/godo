@@ -3,6 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"io"
 )
 
 // The message that is displayed when the app starts with no commands passed
@@ -25,21 +26,21 @@ commands:
 use "goDo [command] -help" for more information about a command`
 
 // Prints the UserManual to the terminal to show user how to use app
-func DisplayUserManual() {
-	fmt.Println(UserManual)
+func DisplayUserManual(w io.Writer) {
+	fmt.Fprintln(w, UserManual)
 }
 
 // Prints the welcome message to the terminal when the app is called with no commands passed
-func DisplayGreeting() {
-	fmt.Println(Greeting)
+func DisplayGreeting(w io.Writer) {
+	fmt.Fprintln(w, Greeting)
 }
 
 // NewHelpCommand is called to pull up the usage or userManual of how to use goDo
-func NewHelpCommand() *Command {
+func NewHelpCommand(w io.Writer) *Command {
 	return &Command{
 		flags: flag.NewFlagSet("help", flag.ExitOnError),
 		Execute: func(cmd *Command, args []string) {
-			DisplayUserManual()
+			DisplayUserManual(w)
 		},
 	}
 }
