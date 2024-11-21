@@ -113,6 +113,6 @@ func TestHelpCommandOutput(t *testing.T) {
 	}
 
 	if buffer.String() != expectedOutput {
-		t.Errorf("When the NewHelpCommand is used it should print out UserManual = %q, want %q", buffer.String(), expectedOutput)
+		t.Errorf("When the NewHelpCommand is used it should print out UserManual got= %q, want= %q", buffer.String(), expectedOutput)
 	}
 }
