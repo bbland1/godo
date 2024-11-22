@@ -3,11 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-
-	// "os"
 	"strings"
-
-	// "os/exec"
 	"testing"
 
 	"github.com/bbland1/goDo/cmd"
@@ -52,12 +48,27 @@ func TestUnknownCommand(t *testing.T) {
 	exitCode := runAppLogic(&buffer, []string{"main", "unknown"})
 
 	if exitCode != 1 {
-		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
 	}
 
 	expectedOutput := fmt.Sprintf("unknown command passed to goDo: %s", "unknown")
 	output := strings.TrimSpace(buffer.String())
 
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestHelpCommand(t *testing.T) {
+	var buffer bytes.Buffer
+	exitCode := runAppLogic(&buffer, []string{"main", "help"})
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := cmd.UserManual
+	output := strings.TrimSpace(buffer.String())
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
 	}
