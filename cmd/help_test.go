@@ -7,6 +7,20 @@ import (
 	"testing"
 )
 
+func TestUsageFlag(t *testing.T) {
+	var buffer bytes.Buffer
+
+	expectedOutput :=  HelpUsage
+
+	helpCommand := NewHelpCommand(&buffer)
+
+	output := helpCommand.flags.Usage
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
 func TestDisplayUserManual(t *testing.T) {
 	var buffer bytes.Buffer
 
@@ -51,7 +65,6 @@ func TestHelpCommandOutput(t *testing.T) {
 	helpCommand := NewHelpCommand(&buffer)
 
 	expectedOutput := UserManual
-
 
 	helpCommand.Execute(helpCommand, nil)
 

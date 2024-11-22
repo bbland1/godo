@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"io"
 )
+const HelpUsage = `print the user manual of goDo to given an overview of how to use the app
 
+usage:
+	goDo help
+
+there are no additional options for help`
 // The message that is displayed when the app starts with no commands passed
 const Greeting = `welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys
 
@@ -37,10 +42,16 @@ func DisplayGreeting(w io.Writer) {
 
 // NewHelpCommand is called to pull up the usage or userManual of how to use goDo
 func NewHelpCommand(w io.Writer) *Command {
-	return &Command{
+	command := &Command{
 		flags: flag.NewFlagSet("help", flag.ExitOnError),
 		Execute: func(cmd *Command, args []string) {
 			DisplayUserManual(w)
 		},
 	}
+
+	command.flags.Usage = func() {
+		fmt.Fprintln(w, HelpUsage)
+	}
+
+	return command
 }
