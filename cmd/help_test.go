@@ -3,12 +3,10 @@ package cmd
 import (
 	"bytes"
 	"strings"
-
-	// "os"
 	"testing"
 )
 
-func TestUsageFlag(t *testing.T) {
+func TestHelpUsageFlag(t *testing.T) {
 	var buffer bytes.Buffer
 
 	expectedOutput := HelpUsage
