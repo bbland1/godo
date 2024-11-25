@@ -49,5 +49,18 @@ func TestVersionInfo(t *testing.T) {
 }
 
 func TestVersionInfoVerbose(t *testing.T) {
+	var buffer bytes.Buffer
 
+	expectedOutput := "goDo v%blank, build: %blank"
+
+
+	versionCommand := NewVersionCommand(&buffer)
+
+	versionCommand.Execute(versionCommand, []string{"-verbose"})
+
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
 }
