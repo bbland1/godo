@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 )
+
 const HelpUsage = `print the user manual of goDo to given an overview of how to use the app
 
 usage:
 	goDo help
 
 there are no additional options for help`
+
 // The message that is displayed when the app starts with no commands passed
 const Greeting = `welcome to goDo your todo list in the terminal allowing you to keep your fingers on the keys
 
@@ -22,11 +24,12 @@ const UserManual = `usage:
 	goDo [command] [options]
 
 options:
-	-h, -help	used to get more information about a command
+	-h		used to get more information about a command
 	
 commands:
-	help	show this message with an overview of all options and commands
-	add	add a new itm to your todo list
+	help		show this message with an overview of all options and commands
+	add		add a new itm to your todo list
+	version 	display the version info of installed goDo
 
 use "goDo [command] -help" for more information about a command`
 
