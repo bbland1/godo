@@ -11,24 +11,23 @@ usage:
 	goDo version [options] 
 
 options:
-	-short	default: false. if true, print just the version info`
+	-verbose	default: false. if true, print just the version info`
 
 type VersionInfo struct {
 	Build string
 	Version string
-	Short bool
+	Verbose bool
 }
 
-var buildInfo = VersionInfo{
-	Build: "blank",
-	Version: "blank",
-	Short: false,
-}
+var buildInfo = VersionInfo{Build: "blank", Version: "blank", Verbose: false}
 
 func versionPrintFunc(w io.Writer) {
-	if buildInfo.Short {
-
+	if buildInfo.Verbose {
+		fmt.Fprintf(w, "goDo v%s, build: %s", buildInfo.Version, buildInfo.Build)
+		return
 	}
+	
+	fmt.Fprintf(w, "goDo v%s", buildInfo.Version)
 }
 
 func NewVersionCommand(w io.Writer) *Command {
