@@ -6,12 +6,12 @@ import (
 	"io"
 )
 
-const VersionUsage = `print the app version and build info of what is currently install
+const VersionUsage = `print the app version what is currently install
 usage:
 	goDo version [options] 
 
 options:
-	-verbose	default: false. if true, print just the version info`
+	-verbose	default: false. if true, print just the version and build info`
 
 type VersionInfo struct {
 	Build string
