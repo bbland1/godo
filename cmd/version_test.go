@@ -9,7 +9,7 @@ import (
 func TestVersionUsageFlag(t *testing.T) {
 	var buffer bytes.Buffer
 
-	expectedOutput := HelpUsage
+	expectedOutput := VersionUsage
 
 	versionCommand := NewVersionCommand(&buffer)
 

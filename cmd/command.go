@@ -14,9 +14,7 @@ type Command struct {
 
 /* cmd is a method receiver that works like `self` or `this` in JS 
 basically saying do the method on the passed thing/object of the method. 
-I
-n this case it will be a command, the *Command is making the type the pointer of the Command struct so that changes made are saved made to the command instance itself
-
+In this case it will be a command, the *Command is making the type the pointer of the Command struct so that changes made are saved made to the command instance itself
 returns an error if the flags can't be parsed */
 
 // Init initializes the command by parsing the provided arguments.
