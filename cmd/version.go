@@ -38,6 +38,8 @@ func NewVersionCommand(w io.Writer) *Command {
 		},
 	}
 
+	command.flags.BoolVar(&buildInfo.Verbose, "verbose", false, "print out the full version/build info")
+
 	command.flags.Usage = func() {
 		fmt.Fprintln(w, VersionUsage)
 	}

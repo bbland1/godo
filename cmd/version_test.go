@@ -51,12 +51,13 @@ func TestVersionInfo(t *testing.T) {
 func TestVersionInfoVerbose(t *testing.T) {
 	var buffer bytes.Buffer
 
-	expectedOutput := "goDo v%blank, build: %blank"
+	expectedOutput := "goDo vblank, build: blank"
 
 
 	versionCommand := NewVersionCommand(&buffer)
 
-	versionCommand.Execute(versionCommand, []string{"-verbose"})
+	versionCommand.Init([]string{"-verbose=true"})
+	versionCommand.Run()
 
 	output := strings.TrimSpace(buffer.String())
 
