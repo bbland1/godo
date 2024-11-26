@@ -73,3 +73,18 @@ func TestHelpCommand(t *testing.T) {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
 	}
 }
+
+func TestVersionCommand(t *testing.T) {
+	var buffer bytes.Buffer
+	exitCode := runAppLogic(&buffer, []string{"main", "version"})
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "goDo v" + cmd.BuildInfo.Version
+	output := strings.TrimSpace(buffer.String())
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}

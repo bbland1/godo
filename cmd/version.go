@@ -19,15 +19,15 @@ type VersionInfo struct {
 	Verbose bool
 }
 
-var buildInfo = VersionInfo{Build: "blank", Version: "blank", Verbose: false}
+var BuildInfo = VersionInfo{Build: "blank", Version: "blank", Verbose: false}
 
 func versionPrintFunc(w io.Writer) {
-	if buildInfo.Verbose {
-		fmt.Fprintf(w, "goDo v%s, build: %s", buildInfo.Version, buildInfo.Build)
+	if BuildInfo.Verbose {
+		fmt.Fprintf(w, "goDo v%s, build: %s\n", BuildInfo.Version, BuildInfo.Build)
 		return
 	}
 	
-	fmt.Fprintf(w, "goDo v%s", buildInfo.Version)
+	fmt.Fprintf(w, "goDo v%s\n", BuildInfo.Version)
 }
 
 func NewVersionCommand(w io.Writer) *Command {
@@ -38,7 +38,7 @@ func NewVersionCommand(w io.Writer) *Command {
 		},
 	}
 
-	command.flags.BoolVar(&buildInfo.Verbose, "verbose", false, "print out the full version/build info")
+	command.flags.BoolVar(&BuildInfo.Verbose, "verbose", false, "print out the full version/build info")
 
 	command.flags.Usage = func() {
 		fmt.Fprintln(w, VersionUsage)
