@@ -33,6 +33,8 @@ func runAppLogic(w io.Writer, args []string) int {
 		command = cmd.NewHelpCommand(w)
 	case "version":
 		command = cmd.NewVersionCommand(w)
+	case "add":
+		command = cmd.NewAddCommand(w)
 	default:
 		usageAndExit(w, fmt.Sprintf("unknown command passed to goDo: %s\n", passedCommand), 1)
 	}

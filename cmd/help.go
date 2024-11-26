@@ -29,7 +29,7 @@ options:
 	
 commands:
 	help		show this message with an overview of all options and commands
-	add		add a new itm to your todo list
+	add		add a new item to your list
 	version 	display the version info of installed goDo
 
 use "goDo [command] -help" for more information about a command`
