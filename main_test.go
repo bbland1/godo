@@ -97,7 +97,7 @@ func TestAddCommand(t *testing.T) {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
 	}
 
-	expectedOutput := "this is an add command"
+	expectedOutput := "this is an add command, and this is everything else, []"
 	output := strings.TrimSpace(buffer.String())
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
