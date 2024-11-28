@@ -1,11 +1,11 @@
 package task
 
 import (
-	// "strings"
+	"strings"
 	"testing"
-	// "time"
+	"time"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 	_ "modernc.org/sqlite" // Import SQLite driver
 )
 
@@ -38,9 +38,9 @@ func TestAddTask(t *testing.T) {
 
 	defer db.Close()
 
-	testName := "tester name"
+	testDescription := "tester name"
 
-	testTask := CreateTask(testName)
+	testTask := CreateTask(testDescription)
 
 	err = AddTask(db, testTask)
 	if err != nil {
@@ -50,12 +50,12 @@ func TestAddTask(t *testing.T) {
 	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
 	row := db.QueryRow(query)
 
-	var id, name string
+	var id, description string
 	var isCompleted bool
-	err = row.Scan(&id, &name, &isCompleted)
+	err = row.Scan(&id, &description, &isCompleted)
 
-	if id != testTask.ID || name != testTask.Name || isCompleted != testTask.IsCompleted {
-		t.Errorf("Expected task (%v), got (%v, %v, %v)", testTask, id, name, isCompleted)
+	if id != testTask.ID || description != testTask.Description || isCompleted != testTask.IsCompleted {
+		t.Errorf("Expected task (%v), got (%v, %v, %v)", testTask, id, description, isCompleted)
 	}
 }
 
@@ -67,9 +67,9 @@ func TestAddingDuplicateTask(t *testing.T) {
 
 	defer db.Close()
 
-	testName := "tester name"
+	testDescription := "tester name"
 
-	testTask := CreateTask(testName)
+	testTask := CreateTask(testDescription)
 
 	err = AddTask(db, testTask)
 	if err != nil {
@@ -78,7 +78,7 @@ func TestAddingDuplicateTask(t *testing.T) {
 
 	duplicateTestTask := &Task{
 		ID:            testTask.ID,
-		Name:          "duplication",
+		Description:   "duplication",
 		IsCompleted:   false,
 		DateAdded:     time.Now(),
 		DateCompleted: nil,
@@ -104,7 +104,7 @@ func TestAddInvalidIDTask(t *testing.T) {
 
 	testTask := &Task{
 		ID:            "7",
-		Name:          "duplication",
+		Description:   "duplication",
 		IsCompleted:   false,
 		DateAdded:     time.Now(),
 		DateCompleted: nil,
@@ -130,7 +130,7 @@ func TestAddEmptyNameTask(t *testing.T) {
 
 	testTask := &Task{
 		ID:            uuid.New().String(),
-		Name:          "",
+		Description:   "",
 		IsCompleted:   false,
 		DateAdded:     time.Now(),
 		DateCompleted: nil,
@@ -154,9 +154,9 @@ func TestDeleteTask(t *testing.T) {
 
 	defer db.Close()
 
-	testName := "tester name"
+	testDescription := "tester name"
 
-	testTask := CreateTask(testName)
+	testTask := CreateTask(testDescription)
 
 	err = AddTask(db, testTask)
 	if err != nil {
@@ -235,8 +235,8 @@ func TestGetATask(t *testing.T) {
 		t.Fatalf("GetATask failed: %v", err)
 	}
 
-	if task.Name != testTask2.Name {
-		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Name, task.Name)
+	if task.Description != testTask2.Description {
+		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Description, task.Description)
 	}
 }
 
