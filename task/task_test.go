@@ -8,9 +8,9 @@ import (
 )
 
 func TestCreateTask(t *testing.T) {
-	name := "a sample task"
+	description := "a sample task"
 
-	task := CreateTask(name)
+	task := CreateTask(description)
 
 	if task.ID == "" {
 		t.Errorf("expected ID to be generated, but got an empty string")
@@ -20,8 +20,8 @@ func TestCreateTask(t *testing.T) {
 		t.Errorf("expected a valid UUID for ID, but got: %v, error: %v", task.ID, err)
 	}
 
-	if task.Name != name {
-		t.Errorf("expected name of the task to be %s, and got %s", name, task.Name)
+	if task.Description != description {
+		t.Errorf("expected name of the task to be %s, and got %s", description, task.Description)
 	}
 
 	if task.IsCompleted != false {
@@ -39,9 +39,9 @@ func TestCreateTask(t *testing.T) {
 }
 
 func TestMarkingTaskAsComplete(t *testing.T) {
-	name := "a sample task"
+	description := "a sample task"
 
-	task := CreateTask(name)
+	task := CreateTask(description)
 
 	task.MarkTaskCompleted()
 
@@ -57,18 +57,18 @@ func TestMarkingTaskAsComplete(t *testing.T) {
 }
 
 func TestUpdatingTaskName(t *testing.T) {
-	name := "a sample task"
-	newName := "a new name"
+	description := "a sample task"
+	newDescription := "a new name"
 
-	task := CreateTask(name)
+	task := CreateTask(description)
 
-	if task.Name != name {
-		t.Errorf("there was an error in creating the task got = %s, want = %s", task.Name, name)
+	if task.Description != description {
+		t.Errorf("there was an error in creating the task got = %s, want = %s", task.Description, description)
 	}
 
-	task.UpdateTaskName(newName)
+	task.UpdateTaskName(newDescription)
 
-	if task.Name != newName {
-		t.Errorf("the update to the task name should have happened, got = %s, want %s", task.Name, newName)
+	if task.Description != newDescription {
+		t.Errorf("the update to the task name should have happened, got = %s, want %s", task.Description, newDescription)
 	}
 }

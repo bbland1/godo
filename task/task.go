@@ -8,17 +8,17 @@ import (
 
 type Task struct {
 	ID            string
-	Name          string
+	Description          string
 	IsCompleted   bool
 	DateAdded     time.Time
 	DateCompleted *time.Time
 }
 
-// CreateTask creates and new task with the passed name.
-func CreateTask(name string) *Task {
+// CreateTask creates and new task with the passed description.
+func CreateTask(description string) *Task {
 	return &Task{
 		ID: uuid.New().String(),
-		Name: name,
+		Description: description,
 		IsCompleted: false,
 		DateAdded: time.Now(),
 		DateCompleted: nil,
@@ -33,7 +33,7 @@ func (t *Task) MarkTaskCompleted() {
 	t.IsCompleted = true
 }
 
-// UpdateTaskName uses the passed string value to replace the task name with the new value
-func (t *Task) UpdateTaskName(newName string) {
-	t.Name = newName
+// UpdateTaskName uses the passed string value to replace the task description with the new value
+func (t *Task) UpdateTaskName(newDescription string) {
+	t.Description = newDescription
 }

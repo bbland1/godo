@@ -1,11 +1,11 @@
 package task
 
 import (
-	"strings"
+	// "strings"
 	"testing"
-	"time"
+	// "time"
 
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 	_ "modernc.org/sqlite" // Import SQLite driver
 )
 
@@ -17,7 +17,7 @@ func TestDatabaseInit(t *testing.T) {
 
 	defer db.Close()
 
-	query := `SELECT name FROM sqlite_master WHERE type=table AND name=tasks`
+	query := `SELECT name FROM sqlite_master WHERE type='table' AND name='tasks'`
 	row := db.QueryRow(query)
 
 	var tableName string
@@ -28,51 +28,6 @@ func TestDatabaseInit(t *testing.T) {
 	if tableName != "tasks" {
 		t.Errorf("Expected table 'tasks', but got: %v", tableName)
 	}
-}
-
-func TestGetAllTasks(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-}
-
-func TestGetATask(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-}
-
-func TestUpdateTaskName(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-}
-
-func TestUpdateTaskComplete(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-}
-
-func TestDeleteTask(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
 }
 
 func TestAddTask(t *testing.T) {
@@ -189,4 +144,124 @@ func TestAddEmptyNameTask(t *testing.T) {
 	if err != nil && strings.Contains(err.Error(), "CHECK constraint failed") {
 		t.Errorf("Expected CHECK constraint error for Name, got: %v", err)
 	}
+}
+
+func TestDeleteTask(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	testName := "tester name"
+
+	testTask := CreateTask(testName)
+
+	err = AddTask(db, testTask)
+	if err != nil {
+		t.Fatalf("AddTask failed: %v", err)
+	}
+
+	err = DeleteTask(db, testTask.ID)
+	if err != nil {
+		t.Errorf("Expected tasked to be deleted and error to be nil, but got %v", err)
+	}
+
+	var count int
+	err = db.QueryRow(`SELECT COUNT(*) FROM tasks WHERE id = ?`, testTask.ID).Scan(&count)
+	if err != nil {
+		t.Fatalf("Error querying task after deletion: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("Expected task to be deleted, but found %d tasks", count)
+	}
+}
+
+func TestDeleteNonExistentTask(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	err = DeleteTask(db, "no-task-here")
+	if err == nil {
+		t.Errorf("Expected an error when attempting to delete a non-exist tas but got none.")
+	}
+
+	if !strings.Contains(err.Error(), "task with ID nonexistent-task-id not found") {
+		t.Errorf("Expected 'task not found' error, but got: %v", err)
+	}
+}
+
+func TestGetAllTasks(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	CreateTask("test 1")
+	CreateTask("test 2")
+	CreateTask("test 3")
+
+	tasks, err := GetAllTasks(db)
+	if err != nil {
+		t.Fatalf("GetAllTasks failed: %v", err)
+	}
+
+	if len(tasks) != 2 {
+		t.Errorf("Expected there to be 3 tasks in DB, got %d", len(tasks))
+	}
+}
+
+func TestGetATask(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	CreateTask("test 1")
+	testTask2 := CreateTask("test 2")
+	CreateTask("test 3")
+
+	task, err := GetATask(db, testTask2.ID)
+	if err != nil {
+		t.Fatalf("GetATask failed: %v", err)
+	}
+
+	if task.Name != testTask2.Name {
+		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Name, task.Name)
+	}
+}
+
+func TestUpdateTaskName(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	CreateTask("test 1")
+	testTask2 := CreateTask("test 2")
+	CreateTask("test 3")
+}
+
+func TestUpdateTaskComplete(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	CreateTask("test 1")
+	testTask2 := CreateTask("test 2")
+	CreateTask("test 3")
 }
