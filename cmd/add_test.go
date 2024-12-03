@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/bbland1/goDo/task"
 )
 
 func TestAddUsageFlag(t *testing.T) {
@@ -11,7 +13,14 @@ func TestAddUsageFlag(t *testing.T) {
 
 	expectedOutput := AddUsage
 
-	addCommand := NewAddCommand(&buffer)
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db)
 
 	addCommand.flags.Usage()
 

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/bbland1/goDo/cmd"
+	"github.com/bbland1/goDo/task"
 )
 
 func TestUsageAndExit(t *testing.T) {
@@ -30,7 +31,14 @@ func TestUsageAndExit(t *testing.T) {
 func TestNoArgs(t *testing.T) {
 	var buffer bytes.Buffer
 
-	exitCode := runAppLogic(&buffer, []string{"main"})
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main"}, db)
 	if exitCode != 0 {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
 	}
@@ -45,7 +53,14 @@ func TestNoArgs(t *testing.T) {
 func TestUnknownCommand(t *testing.T) {
 	var buffer bytes.Buffer
 
-	exitCode := runAppLogic(&buffer, []string{"main", "unknown"})
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "unknown"}, db)
 
 	if exitCode != 1 {
 		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
@@ -61,7 +76,15 @@ func TestUnknownCommand(t *testing.T) {
 
 func TestHelpCommand(t *testing.T) {
 	var buffer bytes.Buffer
-	exitCode := runAppLogic(&buffer, []string{"main", "help"})
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "help"}, db)
 
 	if exitCode != 0 {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
@@ -76,7 +99,15 @@ func TestHelpCommand(t *testing.T) {
 
 func TestVersionCommand(t *testing.T) {
 	var buffer bytes.Buffer
-	exitCode := runAppLogic(&buffer, []string{"main", "version"})
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "version"}, db)
 
 	if exitCode != 0 {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
@@ -91,7 +122,15 @@ func TestVersionCommand(t *testing.T) {
 
 func TestAddCommand(t *testing.T) {
 	var buffer bytes.Buffer
-	exitCode := runAppLogic(&buffer, []string{"main", "add"})
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "add"}, db)
 
 	if exitCode != 0 {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)

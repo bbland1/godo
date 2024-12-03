@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"os"
 
 	"github.com/bbland1/goDo/cmd"
+	"github.com/bbland1/goDo/task"
 )
+const dbFile = "goDo.db"
 
 func usageAndExit(w io.Writer, msg string, code int) int {
 	if msg != "" {
@@ -17,7 +20,7 @@ func usageAndExit(w io.Writer, msg string, code int) int {
 	return code
 }
 
-func runAppLogic(w io.Writer, args []string) int {
+func runAppLogic(w io.Writer, args []string, database *sql.DB) int {
 	if len(args) < 2 {
 		cmd.DisplayGreeting(w)
 		return 0
@@ -34,7 +37,7 @@ func runAppLogic(w io.Writer, args []string) int {
 	case "version":
 		command = cmd.NewVersionCommand(w)
 	case "add":
-		command = cmd.NewAddCommand(w)
+		command = cmd.NewAddCommand(w, database)
 	default:
 		usageAndExit(w, fmt.Sprintf("unknown command passed to goDo: %s\n", passedCommand), 1)
 	}
@@ -49,7 +52,15 @@ func runAppLogic(w io.Writer, args []string) int {
 }
 
 func main() {
-	exitCode := runAppLogic(os.Stdout, os.Args)
+	db, err := task.InitDatabase(dbFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize database: %v\n", err)
+		os.Exit(1)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(os.Stdout, os.Args, db)
 
 	os.Exit(exitCode)
 

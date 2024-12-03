@@ -37,6 +37,7 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 	return db, nil
 }
 
+// AddTask will add the passed task into the sqlite DB.
 func AddTask(db *sql.DB, task *Task) error {
 	addRowQuery := `INSERT INTO tasks (id, description, is_completed, date_added, date_completed) VALUES (?, ?, ?, ?, ?)`
 
