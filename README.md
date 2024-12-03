@@ -13,7 +13,7 @@
 | command  | Description | Working |
 |:---------|:-----------|:--------|
 |`version`| Use to verify the version installed and build info. | ✅ |
-|`add`| Passing add with a description adds a task to the list | ❌ |
+|`add`| Passing add with a description adds a task to the list | ✅ |
 |`edit`| If the description needs to be updated pass the command.  | ❌ |
 |`complete`| To mark a task as complete. | ❌ |
 |`delete`| To delete a task from teh list. | ❌ |
