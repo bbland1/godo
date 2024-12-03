@@ -47,7 +47,7 @@ func TestAddTask(t *testing.T) {
 		t.Fatalf("AddTask failed: %v", err)
 	}
 
-	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
+	query := `SELECT id, description, is_completed FROM tasks WHERE id = ?`
 
 	var id, description string
 	var isCompleted bool
@@ -91,7 +91,7 @@ func TestAddingDuplicateTask(t *testing.T) {
 		t.Errorf("Expected there to be an error when adding a duplicate task but got none")
 	}
 
-	if err != nil && !strings.Contains(err.Error(), "UNIQUE constraint failed") {
+	if err != nil && !strings.Contains(err.Error(), "UNIQUE constraint failed: tasks.id") {
 		t.Errorf("Expected unique constraint error, got: %v", err)
 	}
 }
@@ -117,7 +117,7 @@ func TestAddInvalidIDTask(t *testing.T) {
 		t.Errorf("Expected there to be an error when adding a task with an invalid ID (non-UUID), but got none")
 	}
 
-	if err != nil && strings.Contains(err.Error(), "invalid UUID") {
+	if err != nil && !strings.Contains(err.Error(), "invalid UUID") {
 		t.Errorf("Expected unique constraint error, got: %v", err)
 	}
 }
@@ -143,7 +143,7 @@ func TestAddEmptyNameTask(t *testing.T) {
 		t.Errorf("Expected there to be an error when adding a task with an empty Name, but got none")
 	}
 
-	if err != nil && strings.Contains(err.Error(), "CHECK constraint failed") {
+	if err != nil && !strings.Contains(err.Error(), "description can not be empty") {
 		t.Errorf("Expected CHECK constraint error for Name, got: %v", err)
 	}
 }
