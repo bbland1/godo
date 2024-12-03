@@ -17,8 +17,8 @@ func TestDatabaseInit(t *testing.T) {
 
 	defer db.Close()
 
-	query := `SELECT name FROM sqlite_master WHERE type='table' AND name='tasks'`
-	row := db.QueryRow(query)
+	query := `SELECT name FROM sqlite_master WHERE type='table' AND name= ?`
+	row := db.QueryRow(query, "tasks")
 
 	var tableName string
 	if err := row.Scan(&tableName); err != nil {
@@ -48,11 +48,13 @@ func TestAddTask(t *testing.T) {
 	}
 
 	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
-	row := db.QueryRow(query)
 
 	var id, description string
 	var isCompleted bool
-	err = row.Scan(&id, &description, &isCompleted)
+	err = db.QueryRow(query, testTask.ID).Scan(&id, &description, &isCompleted)
+	if err != nil {
+		t.Fatalf("Error in finding the task in the db, %v", err)
+	}
 
 	if id != testTask.ID || description != testTask.Description || isCompleted != testTask.IsCompleted {
 		t.Errorf("Expected task (%v), got (%v, %v, %v)", testTask, id, description, isCompleted)
@@ -167,9 +169,10 @@ func TestDeleteTask(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected tasked to be deleted and error to be nil, but got %v", err)
 	}
+	query := `SELECT COUNT(*) FROM tasks WHERE id = ?`
 
 	var count int
-	err = db.QueryRow(`SELECT COUNT(*) FROM tasks WHERE id = ?`, testTask.ID).Scan(&count)
+	err = db.QueryRow(query, testTask.ID).Scan(&count)
 	if err != nil {
 		t.Fatalf("Error querying task after deletion: %v", err)
 	}
@@ -230,27 +233,14 @@ func TestGetATask(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	CreateTask("test 3")
 
-	task, err := GetATask(db, testTask2.ID)
+	task, err := GetATaskByID(db, testTask2.ID)
 	if err != nil {
-		t.Fatalf("GetATask failed: %v", err)
+		t.Fatalf("GetATaskById failed: %v", err)
 	}
 
 	if task.Description != testTask2.Description {
 		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Description, task.Description)
 	}
-}
-
-func TestUpdateTaskName(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-
-	CreateTask("test 1")
-	testTask2 := CreateTask("test 2")
-	CreateTask("test 3")
 }
 
 func TestUpdateTaskComplete(t *testing.T) {
@@ -261,7 +251,24 @@ func TestUpdateTaskComplete(t *testing.T) {
 
 	defer db.Close()
 
-	CreateTask("test 1")
-	testTask2 := CreateTask("test 2")
-	CreateTask("test 3")
+	testTask := CreateTask("test 2")
+
+	if err := UpdateTaskCompletionStatus(db, testTask.ID, true); err != nil {
+		t.Fatalf("UpdateTaskCompletionStatus failed: %v", err)
+	}
+
+	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
+
+	var description string
+	var isCompleted bool
+	var dateCompleted time.Time
+	err = db.QueryRow(query, testTask.ID).Scan(&description, &isCompleted, &dateCompleted)
+	if err != nil {
+		t.Fatalf("Error in finding the task in the db, %v", err)
+	}
+
+	if description != testTask.Description || isCompleted != testTask.IsCompleted || testTask.DateCompleted == nil {
+		t.Errorf("Expected task to be marked as completed and have a date completed value not as nil(%v), got (%v, %v, %v)", testTask, description, isCompleted, dateCompleted)
+	}
+
 }

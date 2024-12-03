@@ -40,9 +40,18 @@ func AddTask(db *sql.DB, task *Task) error {
 	return nil
 }
 
-func GetAllTasks(db *sql.DB){
+func GetAllTasks(db *sql.DB) ([]Task, error) {
+	return nil, nil
 }
 
-// func GetATask(db *sql.DB, taskID *Task.ID) (*Task, error) {
-// 	return task, nil
-// }
+func GetATaskByID(db *sql.DB, id string) (*Task, error){
+	return nil, nil
+}
+
+func UpdateTaskCompletionStatus(db *sql.DB, id string, isCompleted bool, ) error {
+	return nil
+}
+
+func DeleteTask(db *sql.DB, id string) error {
+	return nil
+}
