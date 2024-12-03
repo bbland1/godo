@@ -120,7 +120,7 @@ func TestVersionCommand(t *testing.T) {
 	}
 }
 
-func TestAddCommand(t *testing.T) {
+func TestAddCommandNoArgs(t *testing.T) {
 	var buffer bytes.Buffer
 
 	db, err := task.InitDatabase(":memory:")
@@ -137,6 +137,29 @@ func TestAddCommand(t *testing.T) {
 	}
 
 	expectedOutput := "this is an add command, and this is everything else, []"
+	output := strings.TrimSpace(buffer.String())
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestAddCommandArgs(t *testing.T) {
+	var buffer bytes.Buffer
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "add", "tester"}, db)
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := ""
 	output := strings.TrimSpace(buffer.String())
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
