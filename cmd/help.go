@@ -25,7 +25,7 @@ const UserManual = `usage:
 
 options:
 	-h		used to get more information about a command
-	-verbose 		if a command has this option it will print the long form of the information
+	-verbose 	if a command has this option it will print the long form of the information
 	
 commands:
 	help		show this message with an overview of all options and commands

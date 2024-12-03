@@ -2,4 +2,16 @@
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/bbland1/goDo)
 
-A command line app that allows users to view, add, edit, delete and complete a todo list from their terminal.
+`goDo` is designed to play to developers strong suits, their hands on the keys and in the command line. It will allow the user to create and manage tasks directly in the terminal keeping them in tune with their work.
+
+:warning: This project is currently in development and is being updated.
+
+### Features
+
+| command  | Description | Working |
+|:---------|:-----------|:--------|
+|`version`| Use to verify the version installed and build info. | ✅ |
+|`add`| Use to verify the version installed and build info. | ❌ |
+|`edit`| Use to verify the version installed and build info. | ❌ |
+|`complete`| Use to verify the version installed and build info. | ❌ |
+|`delete`| Use to verify the version installed and build info. | ❌ |
