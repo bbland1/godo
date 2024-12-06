@@ -13,28 +13,30 @@ import (
 
 const AddUsage = `add a new task to your list
 usage:
-	goDo add [options]
+	goDo add [options] "a task description"
 	
 options:
-	-h 	passed to pull up more info on how to use the add command further`
+	-h 	show the usage info for the command.`
 
-func addFunc(w io.Writer, database *sql.DB, args []string) {
+func addFunc(w io.Writer, database *sql.DB, args []string) int {
 	if len(args) == 0 {
-		fmt.Fprintf(w, "this is an add command, and this is everything else, %s\n", args)
-		return
+		fmt.Fprintf(os.Stderr, "a description needs to be passed to add a task\n")
+		return 1
 	}
 
 	newTask := task.CreateTask(strings.TrimSpace(args[0]))
 	if err := task.AddTask(database, newTask); err != nil {
 		fmt.Fprintf(os.Stderr, "task did not add to the database: %v", err)
+		return 1
 	}
+	return 0
 }
 
-func NewAddCommand(w io.Writer, database *sql.DB) *Command {
+func NewAddCommand(w io.Writer, database *sql.DB, exitCode *int) (*Command) {
 	command := &Command{
 		flags: flag.NewFlagSet("add", flag.ExitOnError),
 		Execute: func(cmd *Command, args []string) {
-			addFunc(w, database, args)
+			*exitCode = addFunc(w, database, args)
 		},
 	}
 

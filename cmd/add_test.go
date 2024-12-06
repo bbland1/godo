@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -20,11 +21,14 @@ func TestAddUsageFlag(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db)
+	addCommand, exitCode := NewAddCommand(&buffer, db)
 
 	addCommand.flags.Usage()
 
 	output := strings.TrimSpace(buffer.String())
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -62,7 +66,7 @@ func TestAddCommandNoArgs(t *testing.T) {
 
 	addCommand.Execute(addCommand, nil)
 
-	expectedOutput := "this is an add command, and this is everything else, []"
+	expectedOutput := "a description needs to be passed to add a task"
 	output := strings.TrimSpace(buffer.String())
 
 	if output != expectedOutput {
@@ -80,7 +84,7 @@ func TestAddCommandWithDescription(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db)
+	addCommand := NewAddCommand(&buffer, db,)
 
 	addCommand.Execute(addCommand, []string{"tester"})
 

@@ -21,12 +21,14 @@ func usageAndExit(w io.Writer, msg string, code int) int {
 }
 
 func runAppLogic(w io.Writer, args []string, database *sql.DB) int {
+	var exitCode int
+	var command *cmd.Command
+	
 	if len(args) < 2 {
 		cmd.DisplayGreeting(w)
 		return 0
 	}
 
-	var command *cmd.Command
 
 	passedCommand := args[1]
 	passedArgs := args[2:]
@@ -37,7 +39,7 @@ func runAppLogic(w io.Writer, args []string, database *sql.DB) int {
 	case "version":
 		command = cmd.NewVersionCommand(w)
 	case "add":
-		command = cmd.NewAddCommand(w, database)
+		command = cmd.NewAddCommand(w, database, &exitCode)
 	default:
 		usageAndExit(w, fmt.Sprintf("unknown command passed to goDo: %s\n", passedCommand), 1)
 	}
@@ -48,7 +50,7 @@ func runAppLogic(w io.Writer, args []string, database *sql.DB) int {
 
 	command.Init(passedArgs)
 	command.Run()
-	return 0
+	return exitCode
 }
 
 func main() {
