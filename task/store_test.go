@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -148,56 +149,59 @@ func TestAddEmptyNameTask(t *testing.T) {
 	}
 }
 
-// func TestDeleteTask(t *testing.T) {
-// 	db, err := InitDatabase(":memory:")
-// 	if err != nil {
-// 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-// 	}
+func TestDeleteTask(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
 
-// 	defer db.Close()
+	defer db.Close()
 
-// 	testDescription := "tester name"
+	testDescription := "tester name"
 
-// 	testTask := CreateTask(testDescription)
+	testTask := CreateTask(testDescription)
 
-// 	err = AddTask(db, testTask)
-// 	if err != nil {
-// 		t.Fatalf("AddTask failed: %v", err)
-// 	}
+	err = AddTask(db, testTask)
+	if err != nil {
+		t.Fatalf("AddTask failed: %v", err)
+	}
 
-// 	err = DeleteTask(db, testTask.ID)
-// 	if err != nil {
-// 		t.Errorf("Expected tasked to be deleted and error to be nil, but got %v", err)
-// 	}
-// 	query := `SELECT COUNT(*) FROM tasks WHERE id = ?`
+	err = DeleteTask(db, testTask.ID)
+	if err != nil {
+		t.Errorf("Expected tasked to be deleted and error to be nil, but got %v", err)
+	}
+	query := `SELECT COUNT(*) FROM tasks WHERE id = ?`
 
-// 	var count int
-// 	err = db.QueryRow(query, testTask.ID).Scan(&count)
-// 	if err != nil {
-// 		t.Fatalf("Error querying task after deletion: %v", err)
-// 	}
-// 	if count != 0 {
-// 		t.Errorf("Expected task to be deleted, but found %d tasks", count)
-// 	}
-// }
+	var count int
+	err = db.QueryRow(query, testTask.ID).Scan(&count)
+	if err != nil {
+		t.Fatalf("Error querying task after deletion: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("Expected task to be deleted, but found %d tasks", count)
+	}
+}
 
-// func TestDeleteNonExistentTask(t *testing.T) {
-// 	db, err := InitDatabase(":memory:")
-// 	if err != nil {
-// 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-// 	}
+func TestDeleteNonExistentTask(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
 
-// 	defer db.Close()
+	defer db.Close()
 
-// 	err = DeleteTask(db, "no-task-here")
-// 	if err == nil {
-// 		t.Errorf("Expected an error when attempting to delete a non-exist tas but got none.")
-// 	}
+	nonExistentId := "no-task-here"
 
-// 	if !strings.Contains(err.Error(), "task with ID nonexistent-task-id not found") {
-// 		t.Errorf("Expected 'task not found' error, but got: %v", err)
-// 	}
-// }
+	err = DeleteTask(db, nonExistentId)
+	if err == nil {
+		t.Errorf("Expected an error when attempting to delete a non-exist tas but got none.")
+	}
+
+	expectedErrMsg := fmt.Sprintf("task with id = %s not found", nonExistentId)
+	if err.Error() != expectedErrMsg {
+		t.Errorf("Expected error '%s', but got: %v", expectedErrMsg, err)
+	}
+}
 
 // func TestGetAllTasks(t *testing.T) {
 // 	db, err := InitDatabase(":memory:")

@@ -74,6 +74,22 @@ func UpdateTaskCompletionStatus(db *sql.DB, id string, isCompleted bool) error {
 	return nil
 }
 
+// DeleteTask will remove the task from the sqlite DB.
 func DeleteTask(db *sql.DB, id string) error {
+	deleteTaskQuery := `DELETE FROM tasks WHERE id = ?`
+
+	result, err := db.Exec(deleteTaskQuery, id)
+	if err != nil {
+		return fmt.Errorf("error deleting task (id = %s)from the db: %w", id, err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error checking rows affected in the delete in getting : %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("task with id = %s not found", id)
+	}
 	return nil
 }
