@@ -2,13 +2,11 @@ package task
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Task struct {
-	ID            string
-	Description          string
+	ID            int
+	Description   string
 	IsCompleted   bool
 	DateAdded     time.Time
 	DateCompleted *time.Time
@@ -17,10 +15,9 @@ type Task struct {
 // CreateTask creates and new task with the passed description.
 func CreateTask(description string) *Task {
 	return &Task{
-		ID: uuid.New().String(),
-		Description: description,
-		IsCompleted: false,
-		DateAdded: time.Now(),
+		Description:   description,
+		IsCompleted:   false,
+		DateAdded:     time.Now().UTC(),
 		DateCompleted: nil,
 	}
 }

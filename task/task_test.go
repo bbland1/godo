@@ -3,22 +3,12 @@ package task
 import (
 	"testing"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func TestCreateTask(t *testing.T) {
 	description := "a sample task"
 
 	task := CreateTask(description)
-
-	if task.ID == "" {
-		t.Errorf("expected ID to be generated, but got an empty string")
-	}
-
-	if _, err := uuid.Parse(task.ID); err != nil {
-		t.Errorf("expected a valid UUID for ID, but got: %v, error: %v", task.ID, err)
-	}
 
 	if task.Description != description {
 		t.Errorf("expected name of the task to be %s, and got %s", description, task.Description)

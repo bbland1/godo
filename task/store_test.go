@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	_ "modernc.org/sqlite" // Import SQLite driver
 )
 
@@ -48,17 +47,17 @@ func TestAddTask(t *testing.T) {
 		t.Fatalf("AddTask failed: %v", err)
 	}
 
-	query := `SELECT id, description, is_completed FROM tasks WHERE id = ?`
+	query := `SELECT description, is_completed FROM tasks WHERE description = ?`
 
-	var id, description string
+	var description string
 	var isCompleted bool
-	err = db.QueryRow(query, testTask.ID).Scan(&id, &description, &isCompleted)
+	err = db.QueryRow(query, testTask.Description).Scan(&description, &isCompleted)
 	if err != nil {
 		t.Fatalf("Error in finding the task in the db, %v", err)
 	}
 
-	if id != testTask.ID || description != testTask.Description || isCompleted != testTask.IsCompleted {
-		t.Errorf("Expected task (%v), got (%v, %v, %v)", testTask, id, description, isCompleted)
+	if description != testTask.Description || isCompleted != testTask.IsCompleted {
+		t.Errorf("Expected task (%v), got (%v, %v)", testTask, description, isCompleted)
 	}
 }
 
@@ -79,46 +78,14 @@ func TestAddingDuplicateTask(t *testing.T) {
 		t.Fatalf("AddTask failed: %v", err)
 	}
 
-	duplicateTestTask := &Task{
-		ID:            testTask.ID,
-		Description:   "duplication",
-		IsCompleted:   false,
-		DateAdded:     time.Now(),
-		DateCompleted: nil,
-	}
+	duplicateTestTask := CreateTask(testDescription)
 
 	err = AddTask(db, duplicateTestTask)
 	if err == nil {
 		t.Errorf("Expected there to be an error when adding a duplicate task but got none")
 	}
 
-	if err != nil && !strings.Contains(err.Error(), "UNIQUE constraint failed: tasks.id") {
-		t.Errorf("Expected unique constraint error, got: %v", err)
-	}
-}
-
-func TestAddInvalidIDTask(t *testing.T) {
-	db, err := InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-
-	testTask := &Task{
-		ID:            "7",
-		Description:   "duplication",
-		IsCompleted:   false,
-		DateAdded:     time.Now(),
-		DateCompleted: nil,
-	}
-
-	err = AddTask(db, testTask)
-	if err == nil {
-		t.Errorf("Expected there to be an error when adding a task with an invalid ID (non-UUID), but got none")
-	}
-
-	if err != nil && !strings.Contains(err.Error(), "invalid UUID") {
+	if err != nil && !strings.Contains(err.Error(), "UNIQUE constraint failed: tasks.description") {
 		t.Errorf("Expected unique constraint error, got: %v", err)
 	}
 }
@@ -132,7 +99,6 @@ func TestAddEmptyNameTask(t *testing.T) {
 	defer db.Close()
 
 	testTask := &Task{
-		ID:            uuid.New().String(),
 		Description:   "",
 		IsCompleted:   false,
 		DateAdded:     time.Now(),
@@ -166,14 +132,14 @@ func TestDeleteTask(t *testing.T) {
 		t.Fatalf("AddTask failed: %v", err)
 	}
 
-	err = DeleteTask(db, testTask.ID)
+	err = DeleteTask(db, 1)
 	if err != nil {
 		t.Errorf("Expected tasked to be deleted and error to be nil, but got %v", err)
 	}
 	query := `SELECT COUNT(*) FROM tasks WHERE id = ?`
 
 	var count int
-	err = db.QueryRow(query, testTask.ID).Scan(&count)
+	err = db.QueryRow(query, 1).Scan(&count)
 	if err != nil {
 		t.Fatalf("Error querying task after deletion: %v", err)
 	}
@@ -190,40 +156,44 @@ func TestDeleteNonExistentTask(t *testing.T) {
 
 	defer db.Close()
 
-	nonExistentId := "no-task-here"
+	nonExistentId := 1
 
 	err = DeleteTask(db, nonExistentId)
 	if err == nil {
 		t.Errorf("Expected an error when attempting to delete a non-exist tas but got none.")
 	}
 
-	expectedErrMsg := fmt.Sprintf("task with id = %s not found", nonExistentId)
+	expectedErrMsg := fmt.Sprintf("task with id = %d not found", nonExistentId)
 	if err.Error() != expectedErrMsg {
 		t.Errorf("Expected error '%s', but got: %v", expectedErrMsg, err)
 	}
 }
 
-// func TestGetAllTasks(t *testing.T) {
-// 	db, err := InitDatabase(":memory:")
-// 	if err != nil {
-// 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-// 	}
+func TestGetAllTasks(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
 
-// 	defer db.Close()
+	defer db.Close()
 
-// 	CreateTask("test 1")
-// 	CreateTask("test 2")
-// 	CreateTask("test 3")
+	testTask1 := CreateTask("test 1")
+	testTask2 := CreateTask("test 2")
+	testTask3 := CreateTask("test 3")
 
-// 	tasks, err := GetAllTasks(db)
-// 	if err != nil {
-// 		t.Fatalf("GetAllTasks failed: %v", err)
-// 	}
+	AddTask(db, testTask1)
+	AddTask(db, testTask2)
+	AddTask(db, testTask3)
+	
+	tasks, err := GetAllTasks(db)
+	if err != nil {
+		t.Fatalf("GetAllTasks failed: %v", err)
+	}
 
-// 	if len(tasks) != 2 {
-// 		t.Errorf("Expected there to be 3 tasks in DB, got %d", len(tasks))
-// 	}
-// }
+	if len(tasks) != 3 {
+		t.Errorf("Expected there to be 3 tasks in DB, got %d", len(tasks))
+	}
+}
 
 // func TestGetATask(t *testing.T) {
 // 	db, err := InitDatabase(":memory:")

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/google/uuid"
 	_ "modernc.org/sqlite"
 )
 
@@ -23,11 +22,11 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 
 	createTableQuery := `
 	CREATE TABLE IF NOT EXISTS tasks (
-		id TEXT PRIMARY KEY,
-		description TEXT NOT NULL CHECK(description != ''),
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		description TEXT NOT NULL UNIQUE CHECK(description != ''),
 		is_completed INTEGER CHECK(is_completed IN (0,1)) DEFAULT 0 NOT NULL,
-		date_added TEXT NOT NULL,
-		date_completed TEXT
+		date_added DATETIME NOT NULL,
+		date_completed DATETIME
 	)`
 
 	_, err = db.Exec(createTableQuery)
@@ -39,11 +38,7 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 
 // AddTask will add the passed task into the sqlite DB.
 func AddTask(db *sql.DB, task *Task) error {
-	addRowQuery := `INSERT INTO tasks (id, description, is_completed, date_added, date_completed) VALUES (?, ?, ?, ?, ?)`
-
-	if _, err := uuid.Parse(task.ID); err != nil {
-		return fmt.Errorf("invalid UUID: %v", err)
-	}
+	addRowQuery := `INSERT INTO tasks (description, is_completed, date_added, date_completed) VALUES (?, ?, ?, ?)`
 
 	if task.Description == "" {
 		return fmt.Errorf("description can not be empty")
@@ -54,7 +49,7 @@ func AddTask(db *sql.DB, task *Task) error {
 		completedValue = 1
 	}
 
-	_, err := db.Exec(addRowQuery, task.ID, task.Description, completedValue, task.DateAdded, task.DateCompleted)
+	_, err := db.Exec(addRowQuery, task.Description, completedValue, task.DateAdded, task.DateCompleted)
 	if err != nil {
 		return fmt.Errorf("error when adding task to the db: %w", err)
 	}
@@ -63,7 +58,30 @@ func AddTask(db *sql.DB, task *Task) error {
 }
 
 func GetAllTasks(db *sql.DB) ([]Task, error) {
-	return nil, nil
+	getAllTasksQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks`
+
+	rows, err := db.Query(getAllTasksQuery)
+	if err != nil {
+		return nil, fmt.Errorf("error when adding task to the db: %w", err)
+	}
+
+	defer rows.Close()
+
+	var tasks []Task
+	for rows.Next() {
+		var task Task
+		err := rows.Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted);
+		if err != nil {
+			return nil, fmt.Errorf("error scanning task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error during row iteration: %w", err)
+	}
+	
+	return tasks, nil
 }
 
 func GetATaskByID(db *sql.DB, id string) (*Task, error) {
@@ -75,21 +93,21 @@ func UpdateTaskCompletionStatus(db *sql.DB, id string, isCompleted bool) error {
 }
 
 // DeleteTask will remove the task from the sqlite DB.
-func DeleteTask(db *sql.DB, id string) error {
+func DeleteTask(db *sql.DB, id int) error {
 	deleteTaskQuery := `DELETE FROM tasks WHERE id = ?`
 
 	result, err := db.Exec(deleteTaskQuery, id)
 	if err != nil {
-		return fmt.Errorf("error deleting task (id = %s)from the db: %w", id, err)
+		return fmt.Errorf("error deleting task (id = %d)from the db: %w", id, err)
 	}
-	
+
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("error checking rows affected in the delete in getting : %w", err)
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("task with id = %s not found", id)
+		return fmt.Errorf("task with id = %d not found", id)
 	}
 	return nil
 }
