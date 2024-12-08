@@ -2,7 +2,10 @@ module github.com/bbland1/goDo
 
 go 1.23.2
 
-require github.com/google/uuid v1.6.0
+require (
+	github.com/google/uuid v1.6.0 // indirect
+	modernc.org/sqlite v1.34.1
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -15,7 +18,6 @@ require (
 	modernc.org/libc v1.55.3 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
-	modernc.org/sqlite v1.34.1 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
 )

@@ -26,8 +26,8 @@ func NewDeleteCommand(w io.Writer, db *sql.DB, exitCode *int) *Command {
 		},
 	}
 
-	command.flags.String("id", "", "the id used to get and delete a specific task")
-	command.flags.String("description", "", "the id used to get and delete a specific task")
+	command.flags.String("id", "", "the id of the task to be deleted")
+	command.flags.String("description", "", "the description of the task to be deleted")
 
 	command.flags.Usage = func ()  {
 		fmt.Fprintln(w, DeleteUsage)
