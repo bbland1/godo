@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/bbland1/goDo/task"
@@ -19,14 +18,14 @@ options:
 	-h 	show the usage info for the command.`
 
 func addFunc(w io.Writer, database *sql.DB, args []string) int {
-	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "a description needs to be passed to add a task\n")
+	if len(args) == 0 || args[0] == ""{
+		fmt.Fprintf(w, "a description string needs to be passed to add a task\n")
 		return 1
 	}
 
 	newTask := task.CreateTask(strings.TrimSpace(args[0]))
 	if err := task.AddTask(database, newTask); err != nil {
-		fmt.Fprintf(os.Stderr, "task did not add to the database: %v", err)
+		fmt.Fprintf(w, "database error: %v\n", err)
 		return 1
 	}
 	return 0

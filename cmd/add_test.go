@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/bbland1/goDo/task"
 )
+
+var exitCode int
 
 func TestAddUsageFlag(t *testing.T) {
 	var buffer bytes.Buffer
@@ -21,7 +22,7 @@ func TestAddUsageFlag(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand, exitCode := NewAddCommand(&buffer, db)
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
 
 	addCommand.flags.Usage()
 
@@ -45,7 +46,7 @@ func TestAddCommandFlag(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db)
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
 
 	if addCommand.flags.Name() != "add" {
 		t.Errorf("NewAddCommand flag name = %q, want to be %q", addCommand.flags.Name(), "add")
@@ -62,11 +63,15 @@ func TestAddCommandNoArgs(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db)
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
 
 	addCommand.Execute(addCommand, nil)
 
-	expectedOutput := "a description needs to be passed to add a task"
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "a description string needs to be passed to add a task"
 	output := strings.TrimSpace(buffer.String())
 
 	if output != expectedOutput {
@@ -84,7 +89,7 @@ func TestAddCommandWithDescription(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db,)
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
 
 	addCommand.Execute(addCommand, []string{"tester"})
 
@@ -96,24 +101,28 @@ func TestAddCommandWithDescription(t *testing.T) {
 	}
 }
 
-// func TestAddToDBError(t *testing.T) {
-// 	var buffer bytes.Buffer
+func TestAddToDBError(t *testing.T) {
+	var buffer bytes.Buffer
 
-// 	db, err := task.InitDatabase(":memory:")
-// 	if err != nil {
-// 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-// 	}
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
 
-// 	defer db.Close()
+	defer db.Close()
 
-// 	addCommand := NewAddCommand(&buffer, db)
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
 
-// 	addCommand.Execute(addCommand, []string{" "})
+	addCommand.Execute(addCommand, []string{" "})
 
-// 	expectedOutput := "task did not add to the database:"
-// 	output := strings.TrimSpace(buffer.String())
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
 
-// 	if err == nil  {
-// 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
-// 	}
-// }
+	expectedOutput := "database error:"
+	output := strings.TrimSpace(buffer.String())
+
+	if !strings.Contains(output, expectedOutput) {
+		t.Errorf("Expected output to contain: %q, got: %q", expectedOutput, output)
+	}
+}

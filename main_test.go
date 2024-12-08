@@ -28,7 +28,7 @@ func TestUsageAndExit(t *testing.T) {
 	}
 }
 
-func TestNoArgs(t *testing.T) {
+func TestNoCommandArgs(t *testing.T) {
 	var buffer bytes.Buffer
 
 	db, err := task.InitDatabase(":memory:")
@@ -132,11 +132,11 @@ func TestAddCommandNoArgs(t *testing.T) {
 
 	exitCode := runAppLogic(&buffer, []string{"main", "add"}, db)
 
-	if exitCode != 0 {
-		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
 	}
 
-	expectedOutput := "a description needs to be passed to add a task"
+	expectedOutput := "a description string needs to be passed to add a task"
 	output := strings.TrimSpace(buffer.String())
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
