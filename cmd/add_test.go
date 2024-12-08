@@ -8,10 +8,9 @@ import (
 	"github.com/bbland1/goDo/task"
 )
 
-var exitCode int
-
 func TestAddUsageFlag(t *testing.T) {
 	var buffer bytes.Buffer
+	var exitCode int
 
 	expectedOutput := AddUsage
 
@@ -38,6 +37,7 @@ func TestAddUsageFlag(t *testing.T) {
 
 func TestAddCommandFlag(t *testing.T) {
 	var buffer bytes.Buffer
+	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
 	if err != nil {
@@ -55,6 +55,7 @@ func TestAddCommandFlag(t *testing.T) {
 
 func TestAddCommandNoArgs(t *testing.T) {
 	var buffer bytes.Buffer
+	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
 	if err != nil {
@@ -81,6 +82,7 @@ func TestAddCommandNoArgs(t *testing.T) {
 
 func TestAddCommandWithDescription(t *testing.T) {
 	var buffer bytes.Buffer
+	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
 	if err != nil {
@@ -103,6 +105,7 @@ func TestAddCommandWithDescription(t *testing.T) {
 
 func TestAddToDBError(t *testing.T) {
 	var buffer bytes.Buffer
+	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
 	if err != nil {
