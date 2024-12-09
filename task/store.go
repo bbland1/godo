@@ -80,12 +80,34 @@ func GetAllTasks(db *sql.DB) ([]Task, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error during row iteration: %w", err)
 	}
-	
+
 	return tasks, nil
 }
 
-func GetATaskByID(db *sql.DB, id string) (*Task, error) {
-	return nil, nil
+func GetATaskByID(db *sql.DB, id int) (*Task, error) {
+	getTaskQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks WHERE id = ?`
+
+	var task Task
+	err := db.QueryRow(getTaskQuery, id).Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted)
+
+	if err != nil {
+		return nil, fmt.Errorf("error scanning task: %w", err)
+	}
+
+	return &task, nil
+}
+
+func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
+	getTaskQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks WHERE description = ?`
+
+	var task Task
+	err := db.QueryRow(getTaskQuery, description).Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted)
+
+	if err != nil {
+		return nil, fmt.Errorf("error scanning task: %w", err)
+	}
+
+	return &task, nil
 }
 
 func UpdateTaskCompletionStatus(db *sql.DB, id string, isCompleted bool) error {

@@ -195,27 +195,57 @@ func TestGetAllTasks(t *testing.T) {
 	}
 }
 
-// func TestGetATask(t *testing.T) {
-// 	db, err := InitDatabase(":memory:")
-// 	if err != nil {
-// 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-// 	}
+func TestGetATaskById(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
 
-// 	defer db.Close()
+	defer db.Close()
 
-// 	CreateTask("test 1")
-// 	testTask2 := CreateTask("test 2")
-// 	CreateTask("test 3")
+	testTask1 := CreateTask("test 1")
+	testTask2 := CreateTask("test 2")
+	testTask3 := CreateTask("test 3")
 
-// 	task, err := GetATaskByID(db, testTask2.ID)
-// 	if err != nil {
-// 		t.Fatalf("GetATaskById failed: %v", err)
-// 	}
+	AddTask(db, testTask1)
+	AddTask(db, testTask2)
+	AddTask(db, testTask3)
 
-// 	if task.Description != testTask2.Description {
-// 		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Description, task.Description)
-// 	}
-// }
+	task, err := GetATaskByID(db, 2)
+	if err != nil {
+		t.Fatalf("GetATaskById failed: %v", err)
+	}
+
+	if task.Description != testTask2.Description {
+		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Description, task.Description)
+	}
+}
+
+func TestGetATaskByDescription(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	testTask1 := CreateTask("test 1")
+	testTask2 := CreateTask("test 2")
+	testTask3 := CreateTask("test 3")
+
+	AddTask(db, testTask1)
+	AddTask(db, testTask2)
+	AddTask(db, testTask3)
+
+	task, err := GetATaskByDescription(db, testTask2.Description)
+	if err != nil {
+		t.Fatalf("GetATaskById failed: %v", err)
+	}
+
+	if task.Description != testTask2.Description {
+		t.Errorf("Expected the retrieved task to have the name %s, but got %s", testTask2.Description, task.Description)
+	}
+}
 
 // func TestUpdateTaskComplete(t *testing.T) {
 // 	db, err := InitDatabase(":memory:")
