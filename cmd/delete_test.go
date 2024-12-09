@@ -52,3 +52,57 @@ func TestDeleteFlag(t *testing.T) {
 		t.Errorf("NewDeleteCommand flag name = %q, want to be %q", deleteCommand.flags.Name(), "delete")
 	}
 }
+
+func TestDeleteCommandNoArgs(t *testing.T){
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	deleteCommand := NewDeleteCommand(&buffer, db, &exitCode)
+
+	deleteCommand.Execute(deleteCommand, nil)
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "an id or task description needs to be passed for deletion to process"
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestDeleteCommandById(t *testing.T){
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	deleteCommand := NewDeleteCommand(&buffer, db, &exitCode)
+
+	deleteCommand.Execute(deleteCommand, nil)
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "an id or task description needs to be passed for deletion to process"
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
