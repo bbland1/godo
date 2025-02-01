@@ -40,6 +40,8 @@ func runAppLogic(w io.Writer, args []string, database *sql.DB) int {
 		command = cmd.NewVersionCommand(w)
 	case "add":
 		command = cmd.NewAddCommand(w, database, &exitCode)
+	case "delete":
+		command = cmd.NewDeleteCommand(w, database, &exitCode)
 	default:
 		usageAndExit(w, fmt.Sprintf("unknown command passed to goDo: %s\n", passedCommand), 1)
 	}
