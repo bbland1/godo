@@ -8,11 +8,11 @@ import (
 	"github.com/bbland1/goDo/task"
 )
 
-func TestCompleteUsageFlag(t *testing.T) {
+func TestStatusUsageFlag(t *testing.T) {
 	var buffer bytes.Buffer
 	var exitCode int
 
-	expectedOutput := CompleteUsage
+	expectedOutput := StatusUsage
 
 	db, err := task.InitDatabase(":memory:")
 	if err != nil {
@@ -21,9 +21,9 @@ func TestCompleteUsageFlag(t *testing.T) {
 
 	defer db.Close()
 
-	completeCommand := NewCompleteCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
 
-	completeCommand.flags.Usage()
+	statusCommand.flags.Usage()
 
 	output := strings.TrimSpace(buffer.String())
 	if exitCode != 0 {
@@ -35,7 +35,7 @@ func TestCompleteUsageFlag(t *testing.T) {
 	}
 }
 
-func TestCompleteFlag(t *testing.T) {
+func TestStatusFlag(t *testing.T) {
 	var buffer bytes.Buffer
 	var exitCode int
 
@@ -46,9 +46,69 @@ func TestCompleteFlag(t *testing.T) {
 
 	defer db.Close()
 
-	completeCommand := NewCompleteCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
 
-	if completeCommand.flags.Name() != "delete" {
-		t.Errorf("NewDeleteCommand flag name = %q, want to be %q", completeCommand.flags.Name(), "delete")
+	if statusCommand.flags.Name() != "complete" {
+		t.Errorf("NewDeleteCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "complete")
+	}
+}
+
+func TestStatusCommandNoArgs(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Execute(statusCommand, nil)
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "an id or task description needs to be passed to mark something as complete"
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestStatusCommandById(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
+
+	addCommand.Execute(addCommand, []string{"tester"})
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Init([]string{"-id=1"})
+	statusCommand.Run()
+
+	task, err := task.GetATaskByID(db, 1)
+	if err != nil {
+		t.Errorf("Error get the task from db to check the status change", err)
+	}
+
+	expectedOutput := true
+	output := task.IsCompleted
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
 	}
 }

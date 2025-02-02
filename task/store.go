@@ -110,7 +110,22 @@ func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
 	return &task, nil
 }
 
-func UpdateTaskCompletionStatus(db *sql.DB, id string, isCompleted bool) error {
+func UpdateTaskCompletionStatus(db *sql.DB, id int, isCompleted bool) error {
+	updateTaskQuery := `UPDATE tasks SET is_completed= ? WHERE id = ?`
+
+	result, err := db.Exec(updateTaskQuery, isCompleted, id)
+	if err != nil {
+		return fmt.Errorf("error updating task (id = %d) completion status from the db: %w", id, err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error checking rows affected in updating status: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("task with id = %d not found", id)
+	}
 	return nil
 }
 
@@ -120,7 +135,7 @@ func DeleteTask(db *sql.DB, id int) error {
 
 	result, err := db.Exec(deleteTaskQuery, id)
 	if err != nil {
-		return fmt.Errorf("error deleting task (id = %d)from the db: %w", id, err)
+		return fmt.Errorf("error deleting task (id = %d) from the db: %w", id, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
