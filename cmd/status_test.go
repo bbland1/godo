@@ -48,8 +48,8 @@ func TestStatusFlag(t *testing.T) {
 
 	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
 
-	if statusCommand.flags.Name() != "complete" {
-		t.Errorf("NewDeleteCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "complete")
+	if statusCommand.flags.Name() != "status" {
+		t.Errorf("NewStatusCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "complete")
 	}
 }
 
