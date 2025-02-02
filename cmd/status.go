@@ -54,7 +54,7 @@ func statusFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int 
 	if descriptionValue != "" {
 		storedTask, err := task.GetATaskByDescription(database, descriptionValue)
 		if err != nil {
-			fmt.Fprintln(w, "an int needs to be passed for the id")
+			fmt.Fprintln(w, "a task with that description wasn't found")
 			return 1
 		}
 

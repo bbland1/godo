@@ -113,6 +113,90 @@ func TestStatusCommandById(t *testing.T) {
 	}
 }
 
+func TestStatusNoStatus(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
+
+	addCommand.Execute(addCommand, []string{"tester"})
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Init([]string{"-id=1", ""})
+	statusCommand.Run()
+
+	expectedOutput := "a status needs to be passed"
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
+	}
+}
+
+func TestStatusBadStatus(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
+
+	addCommand.Execute(addCommand, []string{"tester"})
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Init([]string{"-id=1", "hello"})
+	statusCommand.Run()
+
+	expectedOutput := "status has to be 'true' or 'false' to update"
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
+	}
+}
+
+func TestStatusBadId(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
+
+	addCommand.Execute(addCommand, []string{"tester"})
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Init([]string{"-id=t", "true"})
+	statusCommand.Run()
+
+	expectedOutput := "an int needs to be passed for the id"
+	output := strings.TrimSpace(buffer.String())
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
+	}
+}
+
 func TestStatusCommandByDescription(t *testing.T) {
 	var buffer bytes.Buffer
 	var exitCode int
@@ -140,6 +224,34 @@ func TestStatusCommandByDescription(t *testing.T) {
 
 	expectedOutput := true
 	output := task.IsCompleted
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
+	}
+}
+
+func TestStatusBadDescription(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
+
+	addCommand.Execute(addCommand, []string{"tester"})
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Init([]string{"-d=&", "true"})
+	statusCommand.Run()
+
+	expectedOutput := "a task with that description wasn't found"
+	output := strings.TrimSpace(buffer.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
