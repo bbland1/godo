@@ -58,7 +58,7 @@ func statusFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int 
 			return 1
 		}
 
-		if err := task.DeleteTask(database, storedTask.ID); err != nil {
+		if err := task.UpdateTaskCompletionStatus(database, storedTask.ID, statusValue); err != nil {
 			fmt.Fprintf(w, "database error: %v\n", err)
 			return 1
 		}

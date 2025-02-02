@@ -112,3 +112,36 @@ func TestStatusCommandById(t *testing.T) {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
 	}
 }
+
+func TestStatusCommandByDescription(t *testing.T) {
+	var buffer bytes.Buffer
+	var exitCode int
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	addCommand := NewAddCommand(&buffer, db, &exitCode)
+
+	addCommand.Execute(addCommand, []string{"tester"})
+
+	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+
+	statusCommand.Init([]string{"-d=tester", "true"})
+	statusCommand.Run()
+
+	task, err := task.GetATaskByID(db, 1)
+	if err != nil {
+		t.Errorf("Error get the task from db to check the status change %v", err)
+	}
+
+	expectedOutput := true
+	output := task.IsCompleted
+
+	if output != expectedOutput {
+		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
+	}
+}
