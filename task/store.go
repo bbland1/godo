@@ -113,7 +113,12 @@ func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
 func UpdateTaskCompletionStatus(db *sql.DB, id int, isCompleted bool) error {
 	updateTaskQuery := `UPDATE tasks SET is_completed= ? WHERE id = ?`
 
-	result, err := db.Exec(updateTaskQuery, isCompleted, id)
+	status := 1
+	if !isCompleted {
+		status = 0
+	}
+
+	result, err := db.Exec(updateTaskQuery, status, id)
 	if err != nil {
 		return fmt.Errorf("error updating task (id = %d) completion status from the db: %w", id, err)
 	}

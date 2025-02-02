@@ -97,18 +97,18 @@ func TestStatusCommandById(t *testing.T) {
 
 	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
 
-	statusCommand.Init([]string{"-id=1"})
+	statusCommand.Init([]string{"-id=1", "true"})
 	statusCommand.Run()
 
 	task, err := task.GetATaskByID(db, 1)
 	if err != nil {
-		t.Errorf("Error get the task from db to check the status change", err)
+		t.Errorf("Error get the task from db to check the status change %v", err)
 	}
 
 	expectedOutput := true
 	output := task.IsCompleted
 
 	if output != expectedOutput {
-		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
 	}
 }
