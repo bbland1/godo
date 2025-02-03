@@ -37,6 +37,7 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 }
 
 // AddTask will add the passed task into the sqlite DB.
+// ? would returning the task id be helpful?
 func AddTask(db *sql.DB, task *Task) error {
 	addRowQuery := `INSERT INTO tasks (description, is_completed, date_added, date_completed) VALUES (?, ?, ?, ?)`
 
@@ -56,6 +57,8 @@ func AddTask(db *sql.DB, task *Task) error {
 
 	return nil
 }
+
+// todo: add a way to bulk add tasks maybe?
 
 func GetAllTasks(db *sql.DB) ([]Task, error) {
 	getAllTasksQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks`

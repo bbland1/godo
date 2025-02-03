@@ -181,9 +181,19 @@ func TestGetAllTasks(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	testTask3 := CreateTask("test 3")
 
-	AddTask(db, testTask1)
-	AddTask(db, testTask2)
-	AddTask(db, testTask3)
+	err = AddTask(db, testTask1)
+	if err != nil {
+		t.Fatalf("AddTask testTask1 failed: %v", err)
+	}
+	err = AddTask(db, testTask2)
+	if err != nil {
+		t.Fatalf("AddTask testTask2 failed: %v", err)
+	}
+
+	err = AddTask(db, testTask3)
+	if err != nil {
+		t.Fatalf("AddTask testTask3 failed: %v", err)
+	}
 	
 	tasks, err := GetAllTasks(db)
 	if err != nil {
@@ -207,9 +217,19 @@ func TestGetATaskById(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	testTask3 := CreateTask("test 3")
 
-	AddTask(db, testTask1)
-	AddTask(db, testTask2)
-	AddTask(db, testTask3)
+	err = AddTask(db, testTask1)
+	if err != nil {
+		t.Fatalf("AddTask testTask1 failed: %v", err)
+	}
+	err = AddTask(db, testTask2)
+	if err != nil {
+		t.Fatalf("AddTask testTask2 failed: %v", err)
+	}
+
+	err = AddTask(db, testTask3)
+	if err != nil {
+		t.Fatalf("AddTask testTask3 failed: %v", err)
+	}
 
 	task, err := GetATaskByID(db, 2)
 	if err != nil {
@@ -233,9 +253,19 @@ func TestGetATaskByDescription(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	testTask3 := CreateTask("test 3")
 
-	AddTask(db, testTask1)
-	AddTask(db, testTask2)
-	AddTask(db, testTask3)
+	err = AddTask(db, testTask1)
+	if err != nil {
+		t.Fatalf("AddTask testTask1 failed: %v", err)
+	}
+	err = AddTask(db, testTask2)
+	if err != nil {
+		t.Fatalf("AddTask testTask2 failed: %v", err)
+	}
+
+	err = AddTask(db, testTask3)
+	if err != nil {
+		t.Fatalf("AddTask testTask3 failed: %v", err)
+	}
 
 	task, err := GetATaskByDescription(db, testTask2.Description)
 	if err != nil {
@@ -247,32 +277,37 @@ func TestGetATaskByDescription(t *testing.T) {
 	}
 }
 
-// func TestUpdateTaskComplete(t *testing.T) {
-// 	db, err := InitDatabase(":memory:")
-// 	if err != nil {
-// 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-// 	}
+func TestUpdateTaskComplete(t *testing.T) {
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
 
-// 	defer db.Close()
+	defer db.Close()
 
-// 	testTask := CreateTask("test 2")
+	testTask := CreateTask("test 2")
 
-// 	if err := UpdateTaskCompletionStatus(db, testTask.ID, true); err != nil {
-// 		t.Fatalf("UpdateTaskCompletionStatus failed: %v", err)
-// 	}
+	err = AddTask(db, testTask)
+	if err != nil {
+		t.Fatalf("AddTask testTask failed: %v", err)
+	}
 
-// 	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
+	if err := UpdateTaskCompletionStatus(db, testTask.ID, true); err != nil {
+		t.Fatalf("UpdateTaskCompletionStatus failed: %v", err)
+	}
 
-// 	var description string
-// 	var isCompleted bool
-// 	var dateCompleted time.Time
-// 	err = db.QueryRow(query, testTask.ID).Scan(&description, &isCompleted, &dateCompleted)
-// 	if err != nil {
-// 		t.Fatalf("Error in finding the task in the db, %v", err)
-// 	}
+	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
 
-// 	if description != testTask.Description || isCompleted != testTask.IsCompleted || testTask.DateCompleted == nil {
-// 		t.Errorf("Expected task to be marked as completed and have a date completed value not as nil(%v), got (%v, %v, %v)", testTask, description, isCompleted, dateCompleted)
-// 	}
+	var description string
+	var isCompleted bool
+	var dateCompleted time.Time
+	err = db.QueryRow(query, testTask.ID).Scan(&description, &isCompleted, &dateCompleted)
+	if err != nil {
+		t.Fatalf("Error in finding the task in the db, %v", err)
+	}
 
-// }
+	if description != testTask.Description || isCompleted != testTask.IsCompleted || testTask.DateCompleted == nil {
+		t.Errorf("Expected task to be marked as completed and have a date completed value not as nil(%v), got (%v, %v, %v)", testTask, description, isCompleted, dateCompleted)
+	}
+
+}
