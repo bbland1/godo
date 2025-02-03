@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -26,7 +27,7 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 		description TEXT NOT NULL UNIQUE CHECK(description != ''),
 		is_completed INTEGER CHECK(is_completed IN (0,1)) DEFAULT 0 NOT NULL,
 		date_added DATETIME NOT NULL,
-		date_completed DATETIME
+		date_updated DATETIME
 	)`
 
 	_, err = db.Exec(createTableQuery)
@@ -39,7 +40,7 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 // AddTask will add the passed task into the sqlite DB.
 // ? would returning the task id be helpful?
 func AddTask(db *sql.DB, task *Task) (int64, error) {
-	addRowQuery := `INSERT INTO tasks (description, is_completed, date_added, date_completed) VALUES (?, ?, ?, ?)`
+	addRowQuery := `INSERT INTO tasks (description, is_completed, date_added, date_updated) VALUES (?, ?, ?, ?)`
 
 	if task.Description == "" {
 		return 0, fmt.Errorf("description can not be empty")
@@ -66,7 +67,7 @@ func AddTask(db *sql.DB, task *Task) (int64, error) {
 // todo: add a way to bulk add tasks maybe?
 
 func GetAllTasks(db *sql.DB) ([]Task, error) {
-	getAllTasksQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks`
+	getAllTasksQuery := `SELECT id, description, is_completed, date_added, date_updated FROM tasks`
 
 	rows, err := db.Query(getAllTasksQuery)
 	if err != nil {
@@ -78,7 +79,7 @@ func GetAllTasks(db *sql.DB) ([]Task, error) {
 	var tasks []Task
 	for rows.Next() {
 		var task Task
-		err := rows.Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted);
+		err := rows.Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning task: %w", err)
 		}
@@ -93,7 +94,7 @@ func GetAllTasks(db *sql.DB) ([]Task, error) {
 }
 
 func GetATaskByID(db *sql.DB, id int64) (*Task, error) {
-	getTaskQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks WHERE id = ?`
+	getTaskQuery := `SELECT id, description, is_completed, date_added, date_updated FROM tasks WHERE id = ?`
 
 	var task Task
 	err := db.QueryRow(getTaskQuery, id).Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted)
@@ -106,7 +107,7 @@ func GetATaskByID(db *sql.DB, id int64) (*Task, error) {
 }
 
 func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
-	getTaskQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks WHERE description = ?`
+	getTaskQuery := `SELECT id, description, is_completed, date_added, date_updated FROM tasks WHERE description = ?`
 
 	var task Task
 	err := db.QueryRow(getTaskQuery, description).Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted)
@@ -119,14 +120,14 @@ func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
 }
 
 func UpdateTaskCompletionStatus(db *sql.DB, id int64, isCompleted bool) error {
-	updateTaskQuery := `UPDATE tasks SET is_completed= ? WHERE id = ?`
+	updateTaskQuery := `UPDATE tasks SET is_completed = ?, date_updated = ? WHERE id = ?`
 
 	status := 1
 	if !isCompleted {
 		status = 0
 	}
 
-	result, err := db.Exec(updateTaskQuery, status, id)
+	result, err := db.Exec(updateTaskQuery, status, time.Now(),id)
 	if err != nil {
 		return fmt.Errorf("error updating task (id = %d) completion status from the db: %w", id, err)
 	}
