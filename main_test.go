@@ -10,6 +10,8 @@ import (
 	"github.com/bbland1/goDo/task"
 )
 
+// todo: need to review the tests to make sure they are effective
+
 func TestUsageAndExit(t *testing.T) {
 	var buffer bytes.Buffer
 
@@ -160,6 +162,122 @@ func TestAddCommandArgs(t *testing.T) {
 	}
 
 	expectedOutput := ""
+	output := strings.TrimSpace(buffer.String())
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestDeleteCommandNoArgs(t *testing.T) {
+	var buffer bytes.Buffer
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "add", "tester"}, db)
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	exitCode = runAppLogic(&buffer, []string{"main", "delete", ""}, db)
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "an id or task description needs to be passed for deletion to process"
+	output := strings.TrimSpace(buffer.String())
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestDeleteCommandArgs(t *testing.T) {
+	var buffer bytes.Buffer
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+	exitCode := runAppLogic(&buffer, []string{"main", "add", "tester"}, db)
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	exitCode = runAppLogic(&buffer, []string{"main", "delete", "-id=1"}, db)
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := ""
+	output := strings.TrimSpace(buffer.String())
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestStatusCommandArgs(t *testing.T) {
+	var buffer bytes.Buffer
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+	exitCode := runAppLogic(&buffer, []string{"main", "add", "tester"}, db)
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	exitCode = runAppLogic(&buffer, []string{"main", "status", "-id=1", "true"}, db)
+
+	// todo: would this need to check that the status changed if that is tested in the status_test
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := ""
+	output := strings.TrimSpace(buffer.String())
+	if output != expectedOutput {
+		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	}
+}
+
+func TestStatusCommandNoArgs(t *testing.T) {
+	var buffer bytes.Buffer
+
+	db, err := task.InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	exitCode := runAppLogic(&buffer, []string{"main", "add", "tester"}, db)
+
+	if exitCode != 0 {
+		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
+	}
+
+	exitCode = runAppLogic(&buffer, []string{"main", "status", ""}, db)
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
+	expectedOutput := "an id or task description needs to be passed to mark something as complete"
 	output := strings.TrimSpace(buffer.String())
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
