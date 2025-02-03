@@ -1,6 +1,7 @@
 package task
 
 import (
+	// "database/sql"
 	"fmt"
 	"strings"
 	"testing"
@@ -42,7 +43,7 @@ func TestAddTask(t *testing.T) {
 
 	testTask := CreateTask(testDescription)
 
-	err = AddTask(db, testTask)
+	_, err = AddTask(db, testTask)
 	if err != nil {
 		t.Fatalf("AddTask failed: %v", err)
 	}
@@ -73,14 +74,14 @@ func TestAddingDuplicateTask(t *testing.T) {
 
 	testTask := CreateTask(testDescription)
 
-	err = AddTask(db, testTask)
+	_, err = AddTask(db, testTask)
 	if err != nil {
 		t.Fatalf("AddTask failed: %v", err)
 	}
 
 	duplicateTestTask := CreateTask(testDescription)
 
-	err = AddTask(db, duplicateTestTask)
+	_, err = AddTask(db, duplicateTestTask)
 	if err == nil {
 		t.Errorf("Expected there to be an error when adding a duplicate task but got none")
 	}
@@ -105,7 +106,7 @@ func TestAddEmptyNameTask(t *testing.T) {
 		DateCompleted: nil,
 	}
 
-	err = AddTask(db, testTask)
+	_, err = AddTask(db, testTask)
 	if err == nil {
 		t.Errorf("Expected there to be an error when adding a task with an empty Name, but got none")
 	}
@@ -127,12 +128,12 @@ func TestDeleteTask(t *testing.T) {
 
 	testTask := CreateTask(testDescription)
 
-	err = AddTask(db, testTask)
+	id, err := AddTask(db, testTask)
 	if err != nil {
 		t.Fatalf("AddTask failed: %v", err)
 	}
 
-	err = DeleteTask(db, 1)
+	err = DeleteTask(db, id)
 	if err != nil {
 		t.Errorf("Expected tasked to be deleted and error to be nil, but got %v", err)
 	}
@@ -156,7 +157,7 @@ func TestDeleteNonExistentTask(t *testing.T) {
 
 	defer db.Close()
 
-	nonExistentId := 1
+	var nonExistentId int64 = 1
 
 	err = DeleteTask(db, nonExistentId)
 	if err == nil {
@@ -181,16 +182,17 @@ func TestGetAllTasks(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	testTask3 := CreateTask("test 3")
 
-	err = AddTask(db, testTask1)
+	_, err = AddTask(db, testTask1)
 	if err != nil {
 		t.Fatalf("AddTask testTask1 failed: %v", err)
 	}
-	err = AddTask(db, testTask2)
+	
+	_, err = AddTask(db, testTask2)
 	if err != nil {
 		t.Fatalf("AddTask testTask2 failed: %v", err)
 	}
 
-	err = AddTask(db, testTask3)
+	_, err = AddTask(db, testTask3)
 	if err != nil {
 		t.Fatalf("AddTask testTask3 failed: %v", err)
 	}
@@ -217,21 +219,21 @@ func TestGetATaskById(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	testTask3 := CreateTask("test 3")
 
-	err = AddTask(db, testTask1)
+	_, err = AddTask(db, testTask1)
 	if err != nil {
 		t.Fatalf("AddTask testTask1 failed: %v", err)
 	}
-	err = AddTask(db, testTask2)
+	id, err := AddTask(db, testTask2)
 	if err != nil {
 		t.Fatalf("AddTask testTask2 failed: %v", err)
 	}
 
-	err = AddTask(db, testTask3)
+	_, err = AddTask(db, testTask3)
 	if err != nil {
 		t.Fatalf("AddTask testTask3 failed: %v", err)
 	}
 
-	task, err := GetATaskByID(db, 2)
+	task, err := GetATaskByID(db, id)
 	if err != nil {
 		t.Fatalf("GetATaskById failed: %v", err)
 	}
@@ -253,16 +255,16 @@ func TestGetATaskByDescription(t *testing.T) {
 	testTask2 := CreateTask("test 2")
 	testTask3 := CreateTask("test 3")
 
-	err = AddTask(db, testTask1)
+	_, err = AddTask(db, testTask1)
 	if err != nil {
 		t.Fatalf("AddTask testTask1 failed: %v", err)
 	}
-	err = AddTask(db, testTask2)
+	_, err = AddTask(db, testTask2)
 	if err != nil {
 		t.Fatalf("AddTask testTask2 failed: %v", err)
 	}
 
-	err = AddTask(db, testTask3)
+	_, err = AddTask(db, testTask3)
 	if err != nil {
 		t.Fatalf("AddTask testTask3 failed: %v", err)
 	}
@@ -287,27 +289,26 @@ func TestUpdateTaskComplete(t *testing.T) {
 
 	testTask := CreateTask("test 2")
 
-	err = AddTask(db, testTask)
+	id, err := AddTask(db, testTask)
 	if err != nil {
 		t.Fatalf("AddTask testTask failed: %v", err)
 	}
 
-	if err := UpdateTaskCompletionStatus(db, testTask.ID, true); err != nil {
+	if err := UpdateTaskCompletionStatus(db, id, true); err != nil {
 		t.Fatalf("UpdateTaskCompletionStatus failed: %v", err)
 	}
 
-	query := `SELECT id, name, is_completed FROM tasks WHERE id = ?`
+	query := `SELECT is_completed FROM tasks WHERE id = ?`
 
-	var description string
 	var isCompleted bool
-	var dateCompleted time.Time
-	err = db.QueryRow(query, testTask.ID).Scan(&description, &isCompleted, &dateCompleted)
+	err = db.QueryRow(query, id).Scan(&isCompleted)
 	if err != nil {
 		t.Fatalf("Error in finding the task in the db, %v", err)
 	}
 
-	if description != testTask.Description || isCompleted != testTask.IsCompleted || testTask.DateCompleted == nil {
-		t.Errorf("Expected task to be marked as completed and have a date completed value not as nil(%v), got (%v, %v, %v)", testTask, description, isCompleted, dateCompleted)
+	expectedOutput := true
+	if expectedOutput != isCompleted {
+		t.Errorf("Expected task to have a status to be %v , got %v", expectedOutput, isCompleted)
 	}
 
 }

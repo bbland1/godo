@@ -38,11 +38,11 @@ func InitDatabase(dbSource string) (*sql.DB, error) {
 
 // AddTask will add the passed task into the sqlite DB.
 // ? would returning the task id be helpful?
-func AddTask(db *sql.DB, task *Task) error {
+func AddTask(db *sql.DB, task *Task) (int64, error) {
 	addRowQuery := `INSERT INTO tasks (description, is_completed, date_added, date_completed) VALUES (?, ?, ?, ?)`
 
 	if task.Description == "" {
-		return fmt.Errorf("description can not be empty")
+		return 0, fmt.Errorf("description can not be empty")
 	}
 
 	completedValue := 0
@@ -50,12 +50,17 @@ func AddTask(db *sql.DB, task *Task) error {
 		completedValue = 1
 	}
 
-	_, err := db.Exec(addRowQuery, task.Description, completedValue, task.DateAdded, task.DateCompleted)
+	result, err := db.Exec(addRowQuery, task.Description, completedValue, task.DateAdded, task.DateCompleted)
 	if err != nil {
-		return fmt.Errorf("error when adding task to the db: %w", err)
+		return 0, fmt.Errorf("error when adding task to the db: %w", err)
 	}
 
-	return nil
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get the id of the inserted task: %w", err)
+	}
+
+	return id, nil
 }
 
 // todo: add a way to bulk add tasks maybe?
@@ -87,7 +92,7 @@ func GetAllTasks(db *sql.DB) ([]Task, error) {
 	return tasks, nil
 }
 
-func GetATaskByID(db *sql.DB, id int) (*Task, error) {
+func GetATaskByID(db *sql.DB, id int64) (*Task, error) {
 	getTaskQuery := `SELECT id, description, is_completed, date_added, date_completed FROM tasks WHERE id = ?`
 
 	var task Task
@@ -113,7 +118,7 @@ func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
 	return &task, nil
 }
 
-func UpdateTaskCompletionStatus(db *sql.DB, id int, isCompleted bool) error {
+func UpdateTaskCompletionStatus(db *sql.DB, id int64, isCompleted bool) error {
 	updateTaskQuery := `UPDATE tasks SET is_completed= ? WHERE id = ?`
 
 	status := 1
@@ -138,7 +143,7 @@ func UpdateTaskCompletionStatus(db *sql.DB, id int, isCompleted bool) error {
 }
 
 // DeleteTask will remove the task from the sqlite DB.
-func DeleteTask(db *sql.DB, id int) error {
+func DeleteTask(db *sql.DB, id int64) error {
 	deleteTaskQuery := `DELETE FROM tasks WHERE id = ?`
 
 	result, err := db.Exec(deleteTaskQuery, id)

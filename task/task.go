@@ -5,7 +5,7 @@ import (
 )
 
 type Task struct {
-	ID            int
+	ID            int64 // sql lite returns task id as int64 so have currently made type match across project
 	Description   string
 	IsCompleted   bool
 	DateAdded     time.Time

@@ -39,7 +39,7 @@ func statusFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int 
 		return 1
 	}
 	if idFlagValue != "" {
-		idNum, err := strconv.Atoi(idFlagValue)
+		idNum, err := strconv.ParseInt(idFlagValue, 10, 64)
 		if err != nil {
 			fmt.Fprintln(w, "an int needs to be passed for the id")
 			return 1

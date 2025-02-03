@@ -24,7 +24,8 @@ func addFunc(w io.Writer, database *sql.DB, args []string) int {
 	}
 
 	newTask := task.CreateTask(strings.TrimSpace(args[0]))
-	if err := task.AddTask(database, newTask); err != nil {
+	// ? this would maybe need to use the id that is now returned
+	if _, err := task.AddTask(database, newTask); err != nil {
 		fmt.Fprintf(w, "database error: %v\n", err)
 		return 1
 	}

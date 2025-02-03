@@ -29,7 +29,7 @@ func deleteFunc(w io.Writer, database *sql.DB,  cmd *Command) int {
 	}
 
 	if idFlagValue != "" {
-		idNum, err := strconv.Atoi(idFlagValue)
+		idNum, err := strconv.ParseInt(idFlagValue, 10, 64)
 		if err != nil {
 			fmt.Fprintln(w, "an int needs to be passed for the id")
 			return 1
