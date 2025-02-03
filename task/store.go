@@ -119,7 +119,7 @@ func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
 	return &task, nil
 }
 
-func UpdateTaskCompletionStatus(db *sql.DB, id int64, isCompleted bool) error {
+func UpdateTaskStatus(db *sql.DB, id int64, isCompleted bool) error {
 	updateTaskQuery := `UPDATE tasks SET is_completed = ?, date_updated = ? WHERE id = ?`
 
 	status := 1
@@ -127,7 +127,7 @@ func UpdateTaskCompletionStatus(db *sql.DB, id int64, isCompleted bool) error {
 		status = 0
 	}
 
-	result, err := db.Exec(updateTaskQuery, status, time.Now(),id)
+	result, err := db.Exec(updateTaskQuery, status, time.Now(), id)
 	if err != nil {
 		return fmt.Errorf("error updating task (id = %d) completion status from the db: %w", id, err)
 	}
@@ -140,6 +140,10 @@ func UpdateTaskCompletionStatus(db *sql.DB, id int64, isCompleted bool) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("task with id = %d not found", id)
 	}
+	return nil
+}
+
+func UpdateTaskDescription(db *sql.DB, id int64, newDescription string) error {
 	return nil
 }
 

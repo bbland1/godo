@@ -279,7 +279,7 @@ func TestGetATaskByDescription(t *testing.T) {
 	}
 }
 
-func TestUpdateTaskComplete(t *testing.T) {
+func TestUpdateTaskStatus(t *testing.T) {
 	db, err := InitDatabase(":memory:")
 	if err != nil {
 		t.Fatalf("InitDatabase failed at creating the db, %v", err)
@@ -294,7 +294,7 @@ func TestUpdateTaskComplete(t *testing.T) {
 		t.Fatalf("AddTask testTask failed: %v", err)
 	}
 
-	if err := UpdateTaskCompletionStatus(db, id, true); err != nil {
+	if err := UpdateTaskStatus(db, id, true); err != nil {
 		t.Fatalf("UpdateTaskCompletionStatus failed: %v", err)
 	}
 
@@ -311,4 +311,8 @@ func TestUpdateTaskComplete(t *testing.T) {
 		t.Errorf("Expected task to have a status to be %v , got %v", expectedOutput, isCompleted)
 	}
 
+}
+
+func TestUpdateTaskDescription(t *testing.T) {
+	
 }

@@ -31,6 +31,7 @@ commands:
 	help		show this message with an overview of all options and commands
 	version 	display the version info of installed goDo
 	add		add a new item to your list
+	edit 		edit the description of a task
 	status 		change the status of a task
 	delete 		remove a task from the list
 
