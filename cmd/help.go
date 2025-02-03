@@ -29,8 +29,10 @@ options:
 	
 commands:
 	help		show this message with an overview of all options and commands
-	add		add a new item to your list
 	version 	display the version info of installed goDo
+	add		add a new item to your list
+	status 		change the status of a task
+	delete 		remove a task from the list
 
 use "goDo [command] -help" for more information about a command`
 
