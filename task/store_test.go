@@ -310,9 +310,37 @@ func TestUpdateTaskStatus(t *testing.T) {
 	if expectedOutput != isCompleted {
 		t.Errorf("Expected task to have a status to be %v , got %v", expectedOutput, isCompleted)
 	}
-
 }
 
 func TestUpdateTaskDescription(t *testing.T) {
-	
+	db, err := InitDatabase(":memory:")
+	if err != nil {
+		t.Fatalf("InitDatabase failed at creating the db, %v", err)
+	}
+
+	defer db.Close()
+
+	testTask := CreateTask("test 2")
+
+	id, err := AddTask(db, testTask)
+	if err != nil {
+		t.Fatalf("AddTask testTask failed: %v", err)
+	}
+
+	if err := UpdateTaskDescription(db, id, "change of test"); err != nil {
+		t.Fatalf("UpdateTaskDescription failed: %v", err)
+	}
+
+	query := `SELECT description FROM tasks WHERE id = ?`
+
+	var description string
+	err = db.QueryRow(query, id).Scan(&description)
+	if err != nil {
+		t.Fatalf("Error in finding the task in the db, %v", err)
+	}
+
+	expectedOutput := "change of test"
+	if expectedOutput != description {
+		t.Errorf("Expected task to have a status to be %v , got %v", expectedOutput, description)
+	}
 }
