@@ -66,6 +66,7 @@ func main() {
 
 	defer db.Close()
 
+	// todo: because this is passing stdout all are the stdout, but the errors probably should go to stderr but passing like this gets the tests to work...
 	exitCode := runAppLogic(os.Stdout, os.Args, db)
 
 	os.Exit(exitCode)
