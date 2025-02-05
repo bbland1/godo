@@ -7,15 +7,16 @@ import (
 )
 
 func TestHelpUsageFlag(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 
 	expectedOutput := HelpUsage
 
-	helpCommand := NewHelpCommand(&buffer)
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
 
 	helpCommand.flags.Usage()
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -23,13 +24,13 @@ func TestHelpUsageFlag(t *testing.T) {
 }
 
 func TestDisplayUserManual(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
 
 	expectedOutput := UserManual
 
-	DisplayUserManual(&buffer)
+	DisplayUserManual(&bufferOut)
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -38,13 +39,13 @@ func TestDisplayUserManual(t *testing.T) {
 }
 
 func TestDisplayGreeting(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
 
 	expectedOutput := Greeting
 
-	DisplayGreeting(&buffer)
+	DisplayGreeting(&bufferOut)
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -53,8 +54,9 @@ func TestDisplayGreeting(t *testing.T) {
 }
 
 func TestHelpCommandFlag(t *testing.T) {
-	var buffer bytes.Buffer
-	helpCommand := NewHelpCommand(&buffer)
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
 
 	if helpCommand.flags.Name() != "help" {
 		t.Errorf("NewHelpCommand flag name = %q, want it to be %q", helpCommand.flags.Name(), "help")
@@ -62,14 +64,15 @@ func TestHelpCommandFlag(t *testing.T) {
 }
 
 func TestHelpCommandOutput(t *testing.T) {
-	var buffer bytes.Buffer
-	helpCommand := NewHelpCommand(&buffer)
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
 
 	expectedOutput := UserManual
 
-	helpCommand.Execute(helpCommand, nil)
+	helpCommand.execute(helpCommand, nil)
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)

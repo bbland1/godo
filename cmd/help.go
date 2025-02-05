@@ -48,17 +48,23 @@ func DisplayGreeting(w io.Writer) {
 }
 
 // NewHelpCommand is called to pull up the usage or userManual of how to use goDo
-func NewHelpCommand(w io.Writer) *Command {
-	command := &Command{
+func NewHelpCommand(stdout, stderr io.Writer) *BaseCommand {
+	command := &BaseCommand{
+		name: "help",
+		description: "show this message with an overview of all options and commands",
 		flags: flag.NewFlagSet("help", flag.ExitOnError),
-		Execute: func(cmd *Command, args []string) {
-			DisplayUserManual(w)
+		output: stdout,
+		errOutput: stderr,
+		execute: func(cmd *BaseCommand, args []string) {
+			DisplayUserManual(cmd.output)
 		},
 	}
 
 	command.flags.Usage = func() {
-		fmt.Fprintln(w, HelpUsage)
+		fmt.Fprintln(command.output, HelpUsage)
 	}
+
+	RegisterCommand(command)
 
 	return command
 }
