@@ -6,6 +6,8 @@ import (
 	"io"
 )
 
+var registeredCommands = make(map[string]Command)
+
 // Command interface to define the structure for all CLI commands
 type Command interface {
 	Init(args []string) error
@@ -20,13 +22,17 @@ type BaseCommand struct {
 	name        string
 	description string
 	flags       *flag.FlagSet
+	output      io.Writer
+	errOutput   io.Writer
 	execute     func(cmd *BaseCommand, args []string)
 }
 
-func NewBasedCommand(name, description string, execute func(cmd *BaseCommand, args []string)) *BaseCommand {
+func NewBaseCommand(name, description string, stdout, stderr io.Writer, execute func(cmd *BaseCommand, args []string)) *BaseCommand {
 	return &BaseCommand{
 		name:        name,
 		description: description,
+		output:      stdout,
+		errOutput:   stderr,
 		flags:       flag.NewFlagSet(name, flag.ExitOnError),
 		execute:     execute,
 	}
@@ -62,20 +68,18 @@ func (cmd *BaseCommand) GetDescription() string {
 	return cmd.description
 }
 
-var commands = make(map[string]Command)
-
 func RegisterCommand(cmd Command) {
-	commands[cmd.GetName()] = cmd
+	registeredCommands[cmd.GetName()] = cmd
 }
 
 func GetCommand(name string) (Command, bool) {
-	cmd, exists := commands[name]
+	cmd, exists := registeredCommands[name]
 	return cmd, exists
 }
 
 func ListCommands(w io.Writer) {
-	fmt.Fprintf(w,"Available commands:\n")
-	for _, cmd := range commands {
+	fmt.Fprintf(w, "Available commands:\n")
+	for _, cmd := range registeredCommands {
 		fmt.Fprintf(w, " %s - %s\n", cmd.GetName(), cmd.GetDescription())
 	}
 }

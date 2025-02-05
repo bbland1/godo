@@ -96,10 +96,10 @@ func TestCommandRun(t *testing.T) {
 
 func TestRegisterCommand(t *testing.T) {
 	testCmd := &BaseCommand{
-		name: "tester",
+		name:        "tester",
 		description: "a tester command",
-		flags: flag.NewFlagSet("test", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string){},
+		flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+		execute:     func(cmd *BaseCommand, args []string) {},
 	}
 
 	RegisterCommand(testCmd)
@@ -126,20 +126,20 @@ func TestGetCommand_NotFOund(t *testing.T) {
 }
 
 func TestListCommands(t *testing.T) {
-	commands = make(map[string]Command)
+	registeredCommands = make(map[string]Command)
 
 	RegisterCommand(&BaseCommand{
-		name: "cmd1",
+		name:        "cmd1",
 		description: "command 1",
-		flags: flag.NewFlagSet("cmd1", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string) {},
+		flags:       flag.NewFlagSet("cmd1", flag.ContinueOnError),
+		execute:     func(cmd *BaseCommand, args []string) {},
 	})
 
 	RegisterCommand(&BaseCommand{
-		name: "cmd2",
+		name:        "cmd2",
 		description: "command 2",
-		flags: flag.NewFlagSet("cmd2", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string) {},
+		flags:       flag.NewFlagSet("cmd2", flag.ContinueOnError),
+		execute:     func(cmd *BaseCommand, args []string) {},
 	})
 
 	var buffer bytes.Buffer
