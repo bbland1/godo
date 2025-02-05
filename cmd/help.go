@@ -64,7 +64,5 @@ func NewHelpCommand(stdout, stderr io.Writer) *BaseCommand {
 		fmt.Fprintln(command.output, HelpUsage)
 	}
 
-	RegisterCommand(command)
-
 	return command
 }
