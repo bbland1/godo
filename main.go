@@ -25,7 +25,7 @@ func main() {
 	// register the commands to be used manually
 	// todo: maybe move to the init once make sure new command logic works for all
 	cmd.RegisterCommand(cmd.NewHelpCommand(os.Stdout, os.Stderr, &exitCode))
-	cmd.RegisterCommand(cmd.NewVersionCommand(os.Stdout, os.Stderr))
+	cmd.RegisterCommand(cmd.NewVersionCommand(os.Stdout, os.Stderr, &exitCode))
 	cmd.RegisterCommand(cmd.NewAddCommand(os.Stdout, os.Stderr, db, &exitCode))
 	cmd.RegisterCommand(cmd.NewStatusCommand(os.Stdout, os.Stderr, db, &exitCode))
 	cmd.RegisterCommand(cmd.NewDeleteCommand(os.Stdout, os.Stderr, db, &exitCode))

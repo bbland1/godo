@@ -21,16 +21,17 @@ type VersionInfo struct {
 
 var BuildInfo = VersionInfo{Build: "blank", Version: "blank", Verbose: false}
 
-func versionPrintFunc(w io.Writer) {
+func versionPrintFunc(w io.Writer) int {
 	if BuildInfo.Verbose {
 		fmt.Fprintf(w, "goDo v%s, build: %s\n", BuildInfo.Version, BuildInfo.Build)
-		return
+		return 0
 	}
 
 	fmt.Fprintf(w, "goDo v%s\n", BuildInfo.Version)
+	return 0
 }
 
-func NewVersionCommand(stdout, stderr io.Writer) *BaseCommand {
+func NewVersionCommand(stdout, stderr io.Writer, exitCode *int) *BaseCommand {
 	command := &BaseCommand{
 		name: "version",
 		description: "message with the version info of the app",
@@ -38,7 +39,7 @@ func NewVersionCommand(stdout, stderr io.Writer) *BaseCommand {
 		output: stdout,
 		errOutput: stderr,
 		execute: func(cmd *BaseCommand, args []string) {
-			versionPrintFunc(cmd.output)
+			*exitCode = versionPrintFunc(cmd.output)
 		},
 	}
 

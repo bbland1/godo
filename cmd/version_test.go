@@ -9,10 +9,11 @@ import (
 func TestVersionUsageFlag(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
+	var exitCode int
 
 	expectedOutput := VersionUsage
 
-	versionCommand := NewVersionCommand(&bufferOut, &bufferErr)
+	versionCommand := NewVersionCommand(&bufferOut, &bufferErr, &exitCode)
 
 	versionCommand.flags.Usage()
 
@@ -26,7 +27,9 @@ func TestVersionUsageFlag(t *testing.T) {
 func TestVersionCommandFlag(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
-	versionCommand := NewVersionCommand(&bufferOut, &bufferErr)
+	var exitCode int
+
+	versionCommand := NewVersionCommand(&bufferOut, &bufferErr, &exitCode)
 
 	if versionCommand.flags.Name() != "version" {
 		t.Errorf("NewVersionCommand flag name = %q, want it to be %q", versionCommand.flags.Name(), "version")
@@ -36,10 +39,11 @@ func TestVersionCommandFlag(t *testing.T) {
 func TestVersionInfo(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
+	var exitCode int
 
 	expectedOutput := "goDo vblank"
 
-	versionCommand := NewVersionCommand(&bufferOut, &bufferErr)
+	versionCommand := NewVersionCommand(&bufferOut, &bufferErr, &exitCode)
 
 	versionCommand.execute(versionCommand, nil)
 
@@ -54,10 +58,12 @@ func TestVersionInfo(t *testing.T) {
 func TestVersionInfoVerbose(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
+	var exitCode int
+
 
 	expectedOutput := "goDo vblank, build: blank"
 
-	versionCommand := NewVersionCommand(&bufferOut, &bufferErr)
+	versionCommand := NewVersionCommand(&bufferOut, &bufferErr, &exitCode)
 
 	versionCommand.Init([]string{"-verbose=true"})
 	versionCommand.Run()
