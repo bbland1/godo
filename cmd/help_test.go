@@ -29,26 +29,39 @@ func TestHelpUsageFlag(t *testing.T) {
 func TestDisplayUserManual(t *testing.T) {
 	var bufferOut bytes.Buffer
 
-	expectedOutput := UserManual
+	exitCode := DisplayUserManual(&bufferOut)
 
-	DisplayUserManual(&bufferOut)
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
-	output := strings.TrimSpace(bufferOut.String())
+	expectedPhrases := []string{
+		"Usage:\n  goDo [command] [options]",
+		"Options:",
+		"\nCommands:",
+	}
 
-	if output != expectedOutput {
-		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	for _, phrase := range expectedPhrases {
+		if !bytes.Contains(bufferOut.Bytes(), []byte(phrase)) {
+			t.Errorf("Expected output to contain '%s', but it was missing", phrase)
+		}
 	}
 
 }
 
 func TestDisplayGreeting(t *testing.T) {
 	var bufferOut bytes.Buffer
+	var exitCode int
 
 	expectedOutput := Greeting
 
-	DisplayGreeting(&bufferOut)
+	exitCode = DisplayGreeting(&bufferOut)
 
 	output := strings.TrimSpace(bufferOut.String())
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)

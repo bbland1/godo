@@ -29,6 +29,7 @@ func main() {
 	cmd.RegisterCommand(cmd.NewAddCommand(os.Stdout, os.Stderr, db, &exitCode))
 	cmd.RegisterCommand(cmd.NewStatusCommand(os.Stdout, os.Stderr, db, &exitCode))
 	cmd.RegisterCommand(cmd.NewDeleteCommand(os.Stdout, os.Stderr, db, &exitCode))
+	cmd.RegisterCommand(cmd.NewEditCommand(os.Stdout, os.Stderr, db, &exitCode))
 	
 	exitCode = runAppLogic(os.Stdout, os.Stderr, os.Args)
 	

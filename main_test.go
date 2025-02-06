@@ -63,13 +63,6 @@ func TestValidCommandPassed(t *testing.T) {
 	if exitCode != 0 {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)
 	}
-
-	expectedOutput := cmd.UserManual
-	output := strings.TrimSpace(bufferOut.String())
-
-	if output != expectedOutput {
-		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
-	}
 }
 
 func TestCommandInitFail(t *testing.T) {

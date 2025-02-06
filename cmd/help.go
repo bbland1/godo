@@ -20,23 +20,6 @@ const Greeting = `welcome to goDo your todo list in the terminal allowing you to
 to learn more about how to use:
 	goDo help`
 
-// The base help message for the app, showing an overview of how it works
-const UserManual = `usage: 
-	goDo [command] [options]
-
-options:
-	-h		used to get more information about a command
-	-verbose 	if a command has this option it will print the long form of the information
-	
-commands:
-	help		show this message with an overview of all options and commands
-	version 	display the version info of installed goDo
-	add		add a new item to your list
-	edit 		edit the description of a task
-	status 		change the status of a task
-	delete 		remove a task from the list
-
-use "goDo [command] -help" for more information about a command`
 
 // Prints the UserManual to the terminal to show user how to use app
 func DisplayUserManual(w io.Writer) int {
