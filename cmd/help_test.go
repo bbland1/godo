@@ -2,20 +2,24 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
+	"text/tabwriter"
 )
 
 func TestHelpUsageFlag(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
+	var exitCode int
 
 	expectedOutput := HelpUsage
 
-	helpCommand := NewHelpCommand(&buffer)
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr, &exitCode)
 
 	helpCommand.flags.Usage()
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -23,28 +27,41 @@ func TestHelpUsageFlag(t *testing.T) {
 }
 
 func TestDisplayUserManual(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
 
-	expectedOutput := UserManual
+	exitCode := DisplayUserManual(&bufferOut)
 
-	DisplayUserManual(&buffer)
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
-	output := strings.TrimSpace(buffer.String())
+	expectedPhrases := []string{
+		"Usage:\n  goDo [command] [options]",
+		"Options:",
+		"\nCommands:",
+	}
 
-	if output != expectedOutput {
-		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
+	for _, phrase := range expectedPhrases {
+		if !bytes.Contains(bufferOut.Bytes(), []byte(phrase)) {
+			t.Errorf("Expected output to contain '%s', but it was missing", phrase)
+		}
 	}
 
 }
 
 func TestDisplayGreeting(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var exitCode int
 
 	expectedOutput := Greeting
 
-	DisplayGreeting(&buffer)
+	exitCode = DisplayGreeting(&bufferOut)
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -53,8 +70,11 @@ func TestDisplayGreeting(t *testing.T) {
 }
 
 func TestHelpCommandFlag(t *testing.T) {
-	var buffer bytes.Buffer
-	helpCommand := NewHelpCommand(&buffer)
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
+	var exitCode int
+
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr, &exitCode)
 
 	if helpCommand.flags.Name() != "help" {
 		t.Errorf("NewHelpCommand flag name = %q, want it to be %q", helpCommand.flags.Name(), "help")
@@ -62,14 +82,33 @@ func TestHelpCommandFlag(t *testing.T) {
 }
 
 func TestHelpCommandOutput(t *testing.T) {
-	var buffer bytes.Buffer
-	helpCommand := NewHelpCommand(&buffer)
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
+	var exitCode int
+	
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr, &exitCode)
 
-	expectedOutput := UserManual
+	helpCommand.execute(helpCommand, nil)
 
-	helpCommand.Execute(helpCommand, nil)
+	var buffExpectedOutput bytes.Buffer
 
-	output := strings.TrimSpace(buffer.String())
+	tw := tabwriter.NewWriter(&buffExpectedOutput, 0, 8, 2, ' ', 0)
+
+	fmt.Fprintln(tw, "Usage:\n  goDo [command] [options]")
+
+	fmt.Fprintln(tw, "\nOptions:")
+	fmt.Fprintln(tw, "  -h\tShow more information about a command")
+	fmt.Fprintln(tw, "  -verbose\tPrint detailed output when available")
+	fmt.Fprintln(tw, "\nCommands:")
+
+	for _, cmd := range registeredCommands {
+		fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())
+	}
+
+	tw.Flush()
+
+	output := strings.TrimSpace(bufferOut.String())
+	expectedOutput := strings.TrimSpace(buffExpectedOutput.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)

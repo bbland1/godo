@@ -9,7 +9,8 @@ import (
 )
 
 func TestStatusUsageFlag(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	expectedOutput := StatusUsage
@@ -21,11 +22,11 @@ func TestStatusUsageFlag(t *testing.T) {
 
 	defer db.Close()
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.flags.Usage()
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 	if exitCode != 0 {
 		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
 	}
@@ -36,7 +37,8 @@ func TestStatusUsageFlag(t *testing.T) {
 }
 
 func TestStatusFlag(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -46,15 +48,16 @@ func TestStatusFlag(t *testing.T) {
 
 	defer db.Close()
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	if statusCommand.flags.Name() != "status" {
-		t.Errorf("NewStatusCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "complete")
+		t.Errorf("NewStatusCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "status")
 	}
 }
 
 func TestStatusCommandNoArgs(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -64,16 +67,16 @@ func TestStatusCommandNoArgs(t *testing.T) {
 
 	defer db.Close()
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	statusCommand.Execute(statusCommand, nil)
+	statusCommand.execute(statusCommand, nil)
 
 	if exitCode != 1 {
 		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
 	}
 
 	expectedOutput := "an id or task description needs to be passed to mark something as complete"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -81,7 +84,8 @@ func TestStatusCommandNoArgs(t *testing.T) {
 }
 
 func TestStatusCommandById(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -91,14 +95,18 @@ func TestStatusCommandById(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.Init([]string{"-id=1", "true"})
 	statusCommand.Run()
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	task, err := task.GetATaskByID(db, 1)
 	if err != nil {
@@ -114,7 +122,8 @@ func TestStatusCommandById(t *testing.T) {
 }
 
 func TestStatusNoStatus(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -124,17 +133,21 @@ func TestStatusNoStatus(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.Init([]string{"-id=1", ""})
 	statusCommand.Run()
 
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
 	expectedOutput := "a status needs to be passed"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
@@ -142,7 +155,8 @@ func TestStatusNoStatus(t *testing.T) {
 }
 
 func TestStatusBadStatus(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -152,17 +166,21 @@ func TestStatusBadStatus(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.Init([]string{"-id=1", "hello"})
 	statusCommand.Run()
 
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
 	expectedOutput := "status has to be 'true' or 'false' to update"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
@@ -170,7 +188,8 @@ func TestStatusBadStatus(t *testing.T) {
 }
 
 func TestStatusBadId(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -180,17 +199,21 @@ func TestStatusBadId(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.Init([]string{"-id=t", "true"})
 	statusCommand.Run()
 
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
 	expectedOutput := "an int needs to be passed for the id"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
@@ -198,7 +221,8 @@ func TestStatusBadId(t *testing.T) {
 }
 
 func TestStatusCommandByDescription(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -208,14 +232,18 @@ func TestStatusCommandByDescription(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.Init([]string{"-d=tester", "true"})
 	statusCommand.Run()
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	task, err := task.GetATaskByID(db, 1)
 	if err != nil {
@@ -231,7 +259,8 @@ func TestStatusCommandByDescription(t *testing.T) {
 }
 
 func TestStatusBadDescription(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -241,17 +270,21 @@ func TestStatusBadDescription(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
-	statusCommand := NewStatusCommand(&buffer, db, &exitCode)
+	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	statusCommand.Init([]string{"-d=&", "true"})
 	statusCommand.Run()
 
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
 	expectedOutput := "a task with that description wasn't found"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)

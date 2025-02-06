@@ -3,7 +3,10 @@ package cmd
 import (
 	"bytes"
 	"flag"
+	"fmt"
+	"strings"
 	"testing"
+	"text/tabwriter"
 )
 
 func TestCommandInit(t *testing.T) {
@@ -96,10 +99,10 @@ func TestCommandRun(t *testing.T) {
 
 func TestRegisterCommand(t *testing.T) {
 	testCmd := &BaseCommand{
-		name: "tester",
+		name:        "tester",
 		description: "a tester command",
-		flags: flag.NewFlagSet("test", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string){},
+		flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+		execute:     func(cmd *BaseCommand, args []string) {},
 	}
 
 	RegisterCommand(testCmd)
@@ -126,29 +129,40 @@ func TestGetCommand_NotFOund(t *testing.T) {
 }
 
 func TestListCommands(t *testing.T) {
-	commands = make(map[string]Command)
+	registeredCommands = make(map[string]Command)
 
 	RegisterCommand(&BaseCommand{
-		name: "cmd1",
+		name:        "cmd1",
 		description: "command 1",
-		flags: flag.NewFlagSet("cmd1", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string) {},
+		flags:       flag.NewFlagSet("cmd1", flag.ContinueOnError),
+		execute:     func(cmd *BaseCommand, args []string) {},
 	})
 
 	RegisterCommand(&BaseCommand{
-		name: "cmd2",
+		name:        "cmd2",
 		description: "command 2",
-		flags: flag.NewFlagSet("cmd2", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string) {},
+		flags:       flag.NewFlagSet("cmd2", flag.ContinueOnError),
+		execute:     func(cmd *BaseCommand, args []string) {},
 	})
 
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
 
-	ListCommands(&buffer)
+	ListCommands(&bufferOut)
 
-	expectedOutput := "Available commands:\n cmd1 - command 1\n cmd2 - command 2\n"
+	var bufferExpectedOutput bytes.Buffer
 
-	if buffer.String() != expectedOutput {
-		t.Errorf("ListCommands() output mismatch.\nGot:\n%q\nWant:\n%q", buffer.String(), expectedOutput)
+	tw := tabwriter.NewWriter(&bufferExpectedOutput, 0, 8, 2, ' ', 0)
+
+	fmt.Fprintln(tw, "commands:")
+	fmt.Fprintln(tw, "  cmd1\t- command 1")
+	fmt.Fprintln(tw, "  cmd2\t- command 2")
+
+	tw.Flush()
+
+	output := strings.TrimSpace(bufferOut.String())
+	expectedOutput := strings.TrimSpace(bufferExpectedOutput.String())
+
+	if output != expectedOutput {
+		t.Errorf("ListCommands() output mismatch.\nGot:\n%q\nWant:\n%q", bufferOut.String(), expectedOutput)
 	}
 }
