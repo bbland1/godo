@@ -19,34 +19,34 @@ options:
 	-id the id of the task to change status
 	-d the description of the task to change status`
 
-func statusFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int {
+func statusFunc(stderr io.Writer, database *sql.DB, args []string, cmd *BaseCommand) int {
 	idFlagValue := cmd.flags.Lookup("id").Value.String()
 	descriptionValue := cmd.flags.Lookup("d").Value.String()
 
 	if idFlagValue == "" && descriptionValue == "" {
-		fmt.Fprintln(w, "an id or task description needs to be passed to mark something as complete")
+		fmt.Fprintln(stderr, "an id or task description needs to be passed to mark something as complete")
 		return 1
 	}
 
 	if len(args) == 0 || args[0] == "" {
-		fmt.Fprintln(w, "a status needs to be passed")
+		fmt.Fprintln(stderr, "a status needs to be passed")
 		return 1
 	}
 
 	statusValue, err := strconv.ParseBool(args[0])
 	if err != nil {
-		fmt.Fprintln(w, "status has to be 'true' or 'false' to update")
+		fmt.Fprintln(stderr, "status has to be 'true' or 'false' to update")
 		return 1
 	}
 	if idFlagValue != "" {
 		idNum, err := strconv.ParseInt(idFlagValue, 10, 64)
 		if err != nil {
-			fmt.Fprintln(w, "an int needs to be passed for the id")
+			fmt.Fprintln(stderr, "an int needs to be passed for the id")
 			return 1
 		}
 
 		if err := task.UpdateTaskStatus(database, idNum, statusValue); err != nil {
-			fmt.Fprintf(w, "database error: %v\n", err)
+			fmt.Fprintf(stderr, "database error: %v\n", err)
 			return 1
 		}
 	}
@@ -54,12 +54,12 @@ func statusFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int 
 	if descriptionValue != "" {
 		storedTask, err := task.GetATaskByDescription(database, descriptionValue)
 		if err != nil {
-			fmt.Fprintln(w, "a task with that description wasn't found")
+			fmt.Fprintln(stderr, "a task with that description wasn't found")
 			return 1
 		}
 
 		if err := task.UpdateTaskStatus(database, storedTask.ID, statusValue); err != nil {
-			fmt.Fprintf(w, "database error: %v\n", err)
+			fmt.Fprintf(stderr, "database error: %v\n", err)
 			return 1
 		}
 	}
@@ -67,11 +67,15 @@ func statusFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int 
 	return 0
 }
 
-func NewStatusCommand(w io.Writer, db *sql.DB, exitCode *int) *Command {
-	command := &Command{
+func NewStatusCommand(stdout, stderr io.Writer, db *sql.DB, exitCode *int) *BaseCommand {
+	command := &BaseCommand{
+		name: "status",
+		description: "update the completion status of a task",
 		flags: flag.NewFlagSet("status", flag.ExitOnError),
-		Execute: func(cmd *Command, args []string) {
-			*exitCode = statusFunc(w, db, args, cmd)
+		output: stdout,
+		errOutput: stderr,
+		execute: func(cmd *BaseCommand, args []string) {
+			*exitCode = statusFunc(cmd.errOutput, db, args, cmd)
 		},
 	}
 
@@ -79,7 +83,7 @@ func NewStatusCommand(w io.Writer, db *sql.DB, exitCode *int) *Command {
 	command.flags.String("d", "", "the description of the task to have status change")
 
 	command.flags.Usage = func() {
-		fmt.Fprintln(w, StatusUsage)
+		fmt.Fprintln(command.output, StatusUsage)
 	}
 	return command
 }
