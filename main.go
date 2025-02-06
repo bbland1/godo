@@ -13,6 +13,7 @@ import (
 const dbFile = "goDo.db"
 
 func main() {
+	var exitCode int
 	db, err := task.InitDatabase(dbFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to initialize database: %v\n", err)
@@ -23,10 +24,11 @@ func main() {
 
 	// register the commands to be used manually
 	// todo: maybe move to the init once make sure new command logic works for all
-	cmd.RegisterCommand(cmd.NewHelpCommand(os.Stdout, os.Stderr))
+	cmd.RegisterCommand(cmd.NewHelpCommand(os.Stdout, os.Stderr, &exitCode))
 	cmd.RegisterCommand(cmd.NewVersionCommand(os.Stdout, os.Stderr))
+	cmd.RegisterCommand(cmd.NewAddCommand(os.Stdout, os.Stderr, db, &exitCode))
 	
-	exitCode := runAppLogic(os.Stdout, os.Stderr, os.Args)
+	exitCode = runAppLogic(os.Stdout, os.Stderr, os.Args)
 	
 	os.Exit(exitCode)
 	

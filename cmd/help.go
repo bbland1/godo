@@ -39,7 +39,7 @@ commands:
 use "goDo [command] -help" for more information about a command`
 
 // Prints the UserManual to the terminal to show user how to use app
-func DisplayUserManual(w io.Writer) {
+func DisplayUserManual(w io.Writer) int {
 	tw := tabwriter.NewWriter(w, 0, 8, 2, ' ', 0)
 
 	fmt.Fprintln(tw, "Usage:\n  goDo [command] [options]")
@@ -54,15 +54,17 @@ func DisplayUserManual(w io.Writer) {
 	}
 
 	tw.Flush()
+	return 0
 }
 
 // Prints the welcome message to the terminal when the app is called with no commands passed
-func DisplayGreeting(w io.Writer) {
+func DisplayGreeting(w io.Writer) int {
 	fmt.Fprintln(w, Greeting)
+	return 0
 }
 
 // NewHelpCommand is called to pull up the usage or userManual of how to use goDo
-func NewHelpCommand(stdout, stderr io.Writer) *BaseCommand {
+func NewHelpCommand(stdout, stderr io.Writer, exitCode *int) *BaseCommand {
 	command := &BaseCommand{
 		name: "help",
 		description: "show this message with an overview of all options and commands",
@@ -70,7 +72,7 @@ func NewHelpCommand(stdout, stderr io.Writer) *BaseCommand {
 		output: stdout,
 		errOutput: stderr,
 		execute: func(cmd *BaseCommand, args []string) {
-			DisplayUserManual(cmd.output)
+			*exitCode = DisplayUserManual(cmd.output)
 		},
 	}
 

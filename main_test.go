@@ -52,12 +52,13 @@ func TestUnknownCommand(t *testing.T) {
 func TestValidCommandPassed(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
+	var exitCode int
 
-	cmd.RegisterCommand(cmd.NewHelpCommand(&bufferOut, &bufferErr))
+	cmd.RegisterCommand(cmd.NewHelpCommand(&bufferOut, &bufferErr, &exitCode))
 
 	args := []string{"godo", "help"}
 
-	exitCode := runAppLogic(&bufferOut, &bufferErr, args)
+	exitCode = runAppLogic(&bufferOut, &bufferErr, args)
 
 	if exitCode != 0 {
 		t.Errorf("Exit code of 0 was expected but got %d", exitCode)

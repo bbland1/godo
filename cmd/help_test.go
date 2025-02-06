@@ -11,10 +11,11 @@ import (
 func TestHelpUsageFlag(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
+	var exitCode int
 
 	expectedOutput := HelpUsage
 
-	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr, &exitCode)
 
 	helpCommand.flags.Usage()
 
@@ -58,7 +59,9 @@ func TestDisplayGreeting(t *testing.T) {
 func TestHelpCommandFlag(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
-	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
+	var exitCode int
+
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr, &exitCode)
 
 	if helpCommand.flags.Name() != "help" {
 		t.Errorf("NewHelpCommand flag name = %q, want it to be %q", helpCommand.flags.Name(), "help")
@@ -68,7 +71,9 @@ func TestHelpCommandFlag(t *testing.T) {
 func TestHelpCommandOutput(t *testing.T) {
 	var bufferOut bytes.Buffer
 	var bufferErr bytes.Buffer
-	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
+	var exitCode int
+	
+	helpCommand := NewHelpCommand(&bufferOut, &bufferErr, &exitCode)
 
 	helpCommand.execute(helpCommand, nil)
 
