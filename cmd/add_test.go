@@ -9,7 +9,8 @@ import (
 )
 
 func TestAddUsageFlag(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	expectedOutput := AddUsage
@@ -21,11 +22,11 @@ func TestAddUsageFlag(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	addCommand.flags.Usage()
 
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 	if exitCode != 0 {
 		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
 	}
@@ -36,7 +37,8 @@ func TestAddUsageFlag(t *testing.T) {
 }
 
 func TestAddCommandFlag(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -46,7 +48,7 @@ func TestAddCommandFlag(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	if addCommand.flags.Name() != "add" {
 		t.Errorf("NewAddCommand flag name = %q, want to be %q", addCommand.flags.Name(), "add")
@@ -54,7 +56,8 @@ func TestAddCommandFlag(t *testing.T) {
 }
 
 func TestAddCommandNoArgs(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -64,16 +67,16 @@ func TestAddCommandNoArgs(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, nil)
+	addCommand.execute(addCommand, nil)
 
 	if exitCode != 1 {
 		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
 	}
 
 	expectedOutput := "a description string needs to be passed to add a task"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -81,7 +84,8 @@ func TestAddCommandNoArgs(t *testing.T) {
 }
 
 func TestAddCommandWithDescription(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -91,12 +95,12 @@ func TestAddCommandWithDescription(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{"tester"})
+	addCommand.execute(addCommand, []string{"tester"})
 
 	expectedOutput := ""
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -104,7 +108,8 @@ func TestAddCommandWithDescription(t *testing.T) {
 }
 
 func TestAddToDBError(t *testing.T) {
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
+	var bufferErr bytes.Buffer
 	var exitCode int
 
 	db, err := task.InitDatabase(":memory:")
@@ -114,16 +119,16 @@ func TestAddToDBError(t *testing.T) {
 
 	defer db.Close()
 
-	addCommand := NewAddCommand(&buffer, db, &exitCode)
+	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
 
-	addCommand.Execute(addCommand, []string{" "})
+	addCommand.execute(addCommand, []string{" "})
 
 	if exitCode != 1 {
 		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
 	}
 
 	expectedOutput := "database error:"
-	output := strings.TrimSpace(buffer.String())
+	output := strings.TrimSpace(bufferOut.String())
 
 	if !strings.Contains(output, expectedOutput) {
 		t.Errorf("Expected output to contain: %q, got: %q", expectedOutput, output)
