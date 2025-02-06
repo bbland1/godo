@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"text/tabwriter"
 )
 
 var registeredCommands = make(map[string]Command)
@@ -78,8 +79,11 @@ func GetCommand(name string) (Command, bool) {
 }
 
 func ListCommands(w io.Writer) {
-	fmt.Fprintf(w, "Available commands:\n")
+	tw := tabwriter.NewWriter(w, 0, 8, 2, ' ',0)
+	fmt.Fprintf(w, "commands:\n")
 	for _, cmd := range registeredCommands {
-		fmt.Fprintf(w, " %s - %s\n", cmd.GetName(), cmd.GetDescription())
+		fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())
 	}
+
+	tw.Flush()
 }

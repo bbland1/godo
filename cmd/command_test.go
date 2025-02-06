@@ -3,7 +3,10 @@ package cmd
 import (
 	"bytes"
 	"flag"
+	"fmt"
+	"strings"
 	"testing"
+	"text/tabwriter"
 )
 
 func TestCommandInit(t *testing.T) {
@@ -142,13 +145,24 @@ func TestListCommands(t *testing.T) {
 		execute:     func(cmd *BaseCommand, args []string) {},
 	})
 
-	var buffer bytes.Buffer
+	var bufferOut bytes.Buffer
 
-	ListCommands(&buffer)
+	ListCommands(&bufferOut)
 
-	expectedOutput := "Available commands:\n cmd1 - command 1\n cmd2 - command 2\n"
+	var bufferExpectedOutput bytes.Buffer
 
-	if buffer.String() != expectedOutput {
-		t.Errorf("ListCommands() output mismatch.\nGot:\n%q\nWant:\n%q", buffer.String(), expectedOutput)
+	tw := tabwriter.NewWriter(&bufferExpectedOutput, 0, 8, 2, ' ', 0)
+
+	fmt.Fprintln(tw, "commands:")
+	fmt.Fprintln(tw, "  cmd1\t- command 1")
+	fmt.Fprintln(tw, "  cmd2\t- command 2")
+
+	tw.Flush()
+
+	output := strings.TrimSpace(bufferOut.String())
+	expectedOutput := strings.TrimSpace(bufferExpectedOutput.String())
+
+	if output != expectedOutput {
+		t.Errorf("ListCommands() output mismatch.\nGot:\n%q\nWant:\n%q", bufferOut.String(), expectedOutput)
 	}
 }

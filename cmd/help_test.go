@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
+	"text/tabwriter"
 )
 
 func TestHelpUsageFlag(t *testing.T) {
@@ -68,11 +70,27 @@ func TestHelpCommandOutput(t *testing.T) {
 	var bufferErr bytes.Buffer
 	helpCommand := NewHelpCommand(&bufferOut, &bufferErr)
 
-	expectedOutput := UserManual
-
 	helpCommand.execute(helpCommand, nil)
 
+	var buffExpectedOutput bytes.Buffer
+
+	tw := tabwriter.NewWriter(&buffExpectedOutput, 0, 8, 2, ' ', 0)
+
+	fmt.Fprintln(tw, "Usage:\n  goDo [command] [options]")
+
+	fmt.Fprintln(tw, "\nOptions:")
+	fmt.Fprintln(tw, "  -h\tShow more information about a command")
+	fmt.Fprintln(tw, "  -verbose\tPrint detailed output when available")
+	fmt.Fprintln(tw, "\nCommands:")
+
+	for _, cmd := range registeredCommands {
+		fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())
+	}
+
+	tw.Flush()
+
 	output := strings.TrimSpace(bufferOut.String())
+	expectedOutput := strings.TrimSpace(buffExpectedOutput.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)

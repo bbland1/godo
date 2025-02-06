@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"text/tabwriter"
 )
 
 const HelpUsage = `print the user manual of goDo to given an overview of how to use the app
@@ -39,7 +40,20 @@ use "goDo [command] -help" for more information about a command`
 
 // Prints the UserManual to the terminal to show user how to use app
 func DisplayUserManual(w io.Writer) {
-	fmt.Fprintln(w, UserManual)
+	tw := tabwriter.NewWriter(w, 0, 8, 2, ' ', 0)
+
+	fmt.Fprintln(tw, "Usage:\n  goDo [command] [options]")
+
+	fmt.Fprintln(tw, "\nOptions:")
+	fmt.Fprintln(tw, "  -h\tShow more information about a command")
+	fmt.Fprintln(tw, "  -verbose\tPrint detailed output when available")
+	fmt.Fprintln(tw, "\nCommands:")
+
+	for _, cmd := range registeredCommands {
+		fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())
+	}
+
+	tw.Flush()
 }
 
 // Prints the welcome message to the terminal when the app is called with no commands passed
