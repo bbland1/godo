@@ -76,7 +76,7 @@ func TestStatusCommandNoArgs(t *testing.T) {
 	}
 
 	expectedOutput := "an id or task description needs to be passed to mark something as complete"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -139,7 +139,7 @@ func TestStatusNoStatus(t *testing.T) {
 	statusCommand.Run()
 
 	expectedOutput := "a status needs to be passed"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
@@ -168,7 +168,7 @@ func TestStatusBadStatus(t *testing.T) {
 	statusCommand.Run()
 
 	expectedOutput := "status has to be 'true' or 'false' to update"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
@@ -197,7 +197,7 @@ func TestStatusBadId(t *testing.T) {
 	statusCommand.Run()
 
 	expectedOutput := "an int needs to be passed for the id"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
@@ -260,7 +260,7 @@ func TestStatusBadDescription(t *testing.T) {
 	statusCommand.Run()
 
 	expectedOutput := "a task with that description wasn't found"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %v, got: %v", expectedOutput, output)
