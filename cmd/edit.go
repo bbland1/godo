@@ -19,12 +19,12 @@ options:
 	-id the id value of the task to be edited
 	-d the description of the task to be edited`
 
-func editFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int {
+func editFunc(w io.Writer, database *sql.DB, args []string, cmd *BaseCommand) int {
 	idFlagValue := cmd.flags.Lookup("id").Value.String()
 	descriptionValue := cmd.flags.Lookup("d").Value.String()
 
 	if idFlagValue == "" && descriptionValue == "" {
-		fmt.Fprintln(w, "an id or task description needs to be passed for edit to process")
+		fmt.Fprintln(w, "an id or task description needs to be passed to edit a task")
 		return 1
 	}
 
@@ -33,11 +33,8 @@ func editFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int {
 		return 1
 	}
 
-	statusValue, err := strconv.ParseBool(args[0])
-	if err != nil {
-		fmt.Fprintln(w, "status has to be 'true' or 'false' to update")
-		return 1
-	}
+	newDescription := args[0]
+
 	if idFlagValue != "" {
 		idNum, err := strconv.ParseInt(idFlagValue, 10, 64)
 		if err != nil {
@@ -45,7 +42,7 @@ func editFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int {
 			return 1
 		}
 
-		if err := task.UpdateTaskStatus(database, idNum, statusValue); err != nil {
+		if err := task.UpdateTaskDescription(database, idNum, newDescription); err != nil {
 			fmt.Fprintf(w, "database error: %v\n", err)
 			return 1
 		}
@@ -58,7 +55,7 @@ func editFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int {
 			return 1
 		}
 
-		if err := task.UpdateTaskStatus(database, storedTask.ID, statusValue); err != nil {
+		if err := task.UpdateTaskDescription(database, storedTask.ID, newDescription); err != nil {
 			fmt.Fprintf(w, "database error: %v\n", err)
 			return 1
 		}
@@ -66,19 +63,23 @@ func editFunc(w io.Writer, database *sql.DB, args []string, cmd *Command) int {
 	return 0
 }
 
-func NewEditCommand(w io.Writer, db *sql.DB, exitCode *int) *Command {
-	command := &Command{
+func NewEditCommand(stdout, stderr io.Writer, db *sql.DB, exitCode *int) *BaseCommand {
+	command := &BaseCommand{
+		name: "edit",
+		description: "edit the description of a task",
 		flags: flag.NewFlagSet("edit", flag.ExitOnError),
-		Execute: func(cmd *Command, args []string) {
-			*exitCode = editFunc(w, db, args, cmd)
+		output: stdout,
+		errOutput: stderr,
+		execute: func(cmd *BaseCommand, args []string) {
+			*exitCode = editFunc(cmd.errOutput, db, args, cmd)
 		},
 	}
 
 	command.flags.String("id", "", "the id of the task to be edited")
-	command.flags.String("d","", "the description of the task to be edited")
+	command.flags.String("d", "", "the description of the task to be edited")
 
 	command.flags.Usage = func() {
-		fmt.Fprintln(w, EditUsage)
+		fmt.Fprintln(command.output, EditUsage)
 	}
 	return command
 }

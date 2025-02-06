@@ -51,7 +51,7 @@ func TestStatusFlag(t *testing.T) {
 	statusCommand := NewStatusCommand(&bufferOut, &bufferErr, db, &exitCode)
 
 	if statusCommand.flags.Name() != "status" {
-		t.Errorf("NewStatusCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "complete")
+		t.Errorf("NewStatusCommand flag name = %q, want to be %q", statusCommand.flags.Name(), "status")
 	}
 }
 
@@ -104,6 +104,10 @@ func TestStatusCommandById(t *testing.T) {
 	statusCommand.Init([]string{"-id=1", "true"})
 	statusCommand.Run()
 
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
+
 	task, err := task.GetATaskByID(db, 1)
 	if err != nil {
 		t.Errorf("Error get the task from db to check the status change %v", err)
@@ -138,6 +142,10 @@ func TestStatusNoStatus(t *testing.T) {
 	statusCommand.Init([]string{"-id=1", ""})
 	statusCommand.Run()
 
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
 	expectedOutput := "a status needs to be passed"
 	output := strings.TrimSpace(bufferErr.String())
 
@@ -166,6 +174,10 @@ func TestStatusBadStatus(t *testing.T) {
 
 	statusCommand.Init([]string{"-id=1", "hello"})
 	statusCommand.Run()
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
 
 	expectedOutput := "status has to be 'true' or 'false' to update"
 	output := strings.TrimSpace(bufferErr.String())
@@ -196,6 +208,10 @@ func TestStatusBadId(t *testing.T) {
 	statusCommand.Init([]string{"-id=t", "true"})
 	statusCommand.Run()
 
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
+
 	expectedOutput := "an int needs to be passed for the id"
 	output := strings.TrimSpace(bufferErr.String())
 
@@ -224,6 +240,10 @@ func TestStatusCommandByDescription(t *testing.T) {
 
 	statusCommand.Init([]string{"-d=tester", "true"})
 	statusCommand.Run()
+
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	task, err := task.GetATaskByID(db, 1)
 	if err != nil {
@@ -258,6 +278,10 @@ func TestStatusBadDescription(t *testing.T) {
 
 	statusCommand.Init([]string{"-d=&", "true"})
 	statusCommand.Run()
+
+	if exitCode != 1 {
+		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
+	}
 
 	expectedOutput := "a task with that description wasn't found"
 	output := strings.TrimSpace(bufferErr.String())
