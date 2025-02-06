@@ -76,7 +76,7 @@ func TestAddCommandNoArgs(t *testing.T) {
 	}
 
 	expectedOutput := "a description string needs to be passed to add a task"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -101,6 +101,9 @@ func TestAddCommandWithDescription(t *testing.T) {
 
 	expectedOutput := ""
 	output := strings.TrimSpace(bufferOut.String())
+	if exitCode != 0 {
+		t.Errorf("Expected exit code to be: 0, got: %d", &exitCode)
+	}
 
 	if output != expectedOutput {
 		t.Errorf("Expected output: %q, got: %q", expectedOutput, output)
@@ -128,7 +131,7 @@ func TestAddToDBError(t *testing.T) {
 	}
 
 	expectedOutput := "database error:"
-	output := strings.TrimSpace(bufferOut.String())
+	output := strings.TrimSpace(bufferErr.String())
 
 	if !strings.Contains(output, expectedOutput) {
 		t.Errorf("Expected output to contain: %q, got: %q", expectedOutput, output)
