@@ -21,7 +21,10 @@ func main() {
 	
 	defer db.Close()
 
+	// register the commands to be used manually
+	// todo: maybe move to the init once make sure new command logic works for all
 	cmd.RegisterCommand(cmd.NewHelpCommand(os.Stdout, os.Stderr))
+	cmd.RegisterCommand(cmd.NewVersionCommand(os.Stdout, os.Stderr))
 	
 	exitCode := runAppLogic(os.Stdout, os.Stderr, os.Args)
 	

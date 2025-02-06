@@ -14,7 +14,7 @@ options:
 	-verbose	default: false. if true, print just the version and build info`
 
 type VersionInfo struct {
-	Build string
+	Build   string
 	Version string
 	Verbose bool
 }
@@ -26,22 +26,26 @@ func versionPrintFunc(w io.Writer) {
 		fmt.Fprintf(w, "goDo v%s, build: %s\n", BuildInfo.Version, BuildInfo.Build)
 		return
 	}
-	
+
 	fmt.Fprintf(w, "goDo v%s\n", BuildInfo.Version)
 }
 
-func NewVersionCommand(w io.Writer) *Command {
-	command := &Command{
+func NewVersionCommand(stdout, stderr io.Writer) *BaseCommand {
+	command := &BaseCommand{
+		name: "version",
+		description: "message with the version info of the app",
 		flags: flag.NewFlagSet("version", flag.ExitOnError),
-		Execute: func(cmd *Command, args []string) {
-			versionPrintFunc(w)
+		output: stdout,
+		errOutput: stderr,
+		execute: func(cmd *BaseCommand, args []string) {
+			versionPrintFunc(cmd.output)
 		},
 	}
 
 	command.flags.BoolVar(&BuildInfo.Verbose, "verbose", false, "print out the full version/build info")
 
 	command.flags.Usage = func() {
-		fmt.Fprintln(w, VersionUsage)
+		fmt.Fprintln(command.output, VersionUsage)
 	}
 
 	return command
