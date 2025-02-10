@@ -23,7 +23,7 @@ func NewViewCommand(stdout, stderr io.Writer, database *sql.DB, exitCode *int) *
 		output: stdout,
 		errOutput: stderr,
 		execute: func(cmd *BaseCommand, args []string) {
-
+			// *exitCode = viewFunc()
 		},
 	}
 
