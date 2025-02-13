@@ -85,7 +85,7 @@ func TestViewCommandNoArgs(t *testing.T) {
 		t.Errorf("There has been an issue getting the tasks from the DB, %s", err)
 	}
 	tw := tabwriter.NewWriter(&bufExpOut, 0, 8, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tTask Description\tStatus")
+	fmt.Fprintln(tw, "ID\tTask Description\tStatusgi")
 
 	for _, storedTask := range tasks {
 		fmt.Fprintf(tw, "%d\t%s\t%t\n", storedTask.ID, storedTask.Description, storedTask.IsCompleted)
