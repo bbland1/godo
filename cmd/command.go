@@ -84,6 +84,14 @@ func RegisterCommand(cmd Command) {
 	registeredCommands[cmd.GetName()] = cmd
 }
 
+func ClearCommandRegistry() {
+	registeredCommands = map[string]Command{}
+}
+
+func GetRegisteredCommands() map[string]Command {
+	return registeredCommands
+}
+
 func GetCommand(name string) (Command, bool) {
 	cmd, exists := registeredCommands[name]
 	return cmd, exists
