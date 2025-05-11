@@ -9,24 +9,32 @@ import (
 
 var registeredCommands = make(map[string]Command)
 
-// Command interface to define the structure for all CLI commands
-type Command interface {
-	Init(args []string) error
-	Run()
-	Called() bool
-	GetName() string
-	GetDescription() string
-}
+type (
+	// Command interface to define the structure for all CLI commands
+	Command interface {
+		Init(args []string) error
+		Run()
+		Called() bool
+		GetName() string
+		GetDescription() string
+	}
+	// BaseCommand defines a structure for a command that has flags and an execution function.
+	BaseCommand struct {
+		name        string
+		description string
+		flags       *flag.FlagSet
+		output      io.Writer
+		errOutput   io.Writer
+		execute     func(cmd *BaseCommand, args []string)
+		passedFlags map[string]bool
+	}
 
-// BaseCommand defines a structure for a command that has flags and an execution function.
-type BaseCommand struct {
-	name        string
-	description string
-	flags       *flag.FlagSet
-	output      io.Writer
-	errOutput   io.Writer
-	execute     func(cmd *BaseCommand, args []string)
-}
+	TrackedFlags struct {
+		flag.Value
+		name          string
+		passedCommand *BaseCommand
+	}
+)
 
 /* cmd is a method receiver that works like `self` or `this` in JS
 basically saying do the method on the passed thing/object of the method.
@@ -58,6 +66,20 @@ func (cmd *BaseCommand) GetDescription() string {
 	return cmd.description
 }
 
+func (tf *TrackedFlags) Set(passedValue string) error {
+	if tf.passedCommand.passedFlags == nil {
+		tf.passedCommand.passedFlags = make(map[string]bool)
+	}
+
+	tf.passedCommand.passedFlags[tf.name] = true
+	
+	return tf.Value.Set(passedValue)
+}
+
+func (tf *TrackedFlags) Get() interface{} {
+	return tf.Value.(flag.Getter).Get()
+}
+
 func RegisterCommand(cmd Command) {
 	registeredCommands[cmd.GetName()] = cmd
 }
@@ -68,7 +90,7 @@ func GetCommand(name string) (Command, bool) {
 }
 
 func ListCommands(w io.Writer) {
-	tw := tabwriter.NewWriter(w, 0, 8, 2, ' ',0)
+	tw := tabwriter.NewWriter(w, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(w, "commands:\n")
 	for _, cmd := range registeredCommands {
 		fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())

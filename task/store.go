@@ -71,7 +71,7 @@ func GetAllTasks(db *sql.DB) ([]Task, error) {
 
 	rows, err := db.Query(getAllTasksQuery)
 	if err != nil {
-		return nil, fmt.Errorf("error when adding task to the db: %w", err)
+		return nil, fmt.Errorf("error when retrieving tasks from the db: %w", err)
 	}
 
 	defer rows.Close()
@@ -117,6 +117,38 @@ func GetATaskByDescription(db *sql.DB, description string) (*Task, error) {
 	}
 
 	return &task, nil
+}
+
+func GetTasksByStatus(db *sql.DB, isCompleted bool) ([]Task, error) {
+	getTasksQuery := `SELECT id, description, is_completed, date_added, status_changed FROM tasks WHERE is_completed = ?`
+
+	status := 1
+	if !isCompleted {
+		status = 0
+	}
+
+	rows, err := db.Query(getTasksQuery, status)
+
+	if err != nil {
+		return nil, fmt.Errorf("error when retrieving tasks from the db: %w", err)
+	}
+	defer rows.Close()
+
+	var tasks []Task
+	for rows.Next() {
+		var task Task
+		err := rows.Scan(&task.ID, &task.Description, &task.IsCompleted, &task.DateAdded, &task.DateCompleted)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error during row iteration: %w", err)
+	}
+
+	return tasks, nil
 }
 
 func UpdateTaskStatus(db *sql.DB, id int64, isCompleted bool) error {
