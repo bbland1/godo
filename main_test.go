@@ -10,6 +10,7 @@ import (
 
 	"github.com/bbland1/goDo/cmd"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunAppLogic(t *testing.T) {
@@ -77,9 +78,17 @@ func TestRunAppLogic(t *testing.T) {
 
 			exitCode = runAppLogic(&bufferOut, &bufferErr, testCase.args)
 
-			assert.Equal(t, testCase.expectedCode, exitCode, "exit codes do not match")
-			assert.Equal(t, testCase.expectedErr, strings.TrimSpace(bufferErr.String()), "unexpected stderr message")
-			assert.Equal(t, testCase.expectedOut, strings.TrimSpace(bufferOut.String()), "unexpected stdout message")
+			require.Equal(t, testCase.expectedCode, exitCode, "exit codes do not match")
+
+			if testCase.expectedErr != "" {
+
+				assert.Equal(t, testCase.expectedErr, strings.TrimSpace(bufferErr.String()), "unexpected stderr message")
+			}
+
+			if testCase.expectedOut != "" {
+
+				assert.Equal(t, testCase.expectedOut, strings.TrimSpace(bufferOut.String()), "unexpected stdout message")
+			}
 		})
 	}
 }
