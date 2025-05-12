@@ -10,34 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddToDBError(t *testing.T) {
-	var bufferOut bytes.Buffer
-	var bufferErr bytes.Buffer
-	var exitCode int
-
-	db, err := task.InitDatabase(":memory:")
-	if err != nil {
-		t.Fatalf("InitDatabase failed at creating the db, %v", err)
-	}
-
-	defer db.Close()
-
-	addCommand := NewAddCommand(&bufferOut, &bufferErr, db, &exitCode)
-
-	addCommand.execute(addCommand, []string{" "})
-
-	if exitCode != 1 {
-		t.Errorf("Exit code of 1 was expected but got %d", exitCode)
-	}
-
-	expectedOutput := "database error:"
-	output := strings.TrimSpace(bufferErr.String())
-
-	if !strings.Contains(output, expectedOutput) {
-		t.Errorf("Expected output to contain: %q, got: %q", expectedOutput, output)
-	}
-}
-
 func TestAddCommand(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -71,7 +43,7 @@ func TestAddCommand(t *testing.T) {
 			name:         "invalid description (whitespace only)",
 			args:         []string{" "},
 			expectedCode: 1,
-			expectedOut:  "database error:",
+			expectedErr:  "database error:",
 			useContains:  true,
 		},
 	}
@@ -100,9 +72,11 @@ func TestAddCommand(t *testing.T) {
 				errOutput := strings.TrimSpace(bufferErr.String())
 
 				if testCase.useContains {
-					assert.Contains(t,  errOutput, testCase.expectedErr, "unexpected stderr message")
+					assert.Contains(t, errOutput, testCase.expectedErr, "unexpected stderr message")
+				} else {
+
+					assert.Equal(t, testCase.expectedErr, errOutput, "unexpected stderr message")
 				}
-				assert.Equal(t, testCase.expectedErr, errOutput, "unexpected stderr message")
 			}
 
 			if testCase.expectedOut != "" {
