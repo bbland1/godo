@@ -7,30 +7,35 @@ import (
 	"strings"
 	"testing"
 	"text/tabwriter"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	// "github.com/bbland1/goDo/task"
+	// "github.com/stretchr/testify/require"
 )
 
-func TestCommandInit(t *testing.T) {
-	cmd := &BaseCommand{
-		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-	}
+// func TestCommandInit(t *testing.T) {
+// 	cmd := &BaseCommand{
+// 		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
+// 	}
 
-	cmd.flags.String("name", "", "a test of string flag")
+// 	cmd.flags.String("name", "", "a test of string flag")
 
-	sampleArgs := []string{"-name", "your name"}
+// 	sampleArgs := []string{"-name", "your name"}
 
-	err := cmd.Init(sampleArgs)
+// 	err := cmd.Init(sampleArgs)
 
-	if err != nil {
-		t.Errorf("Init() returned an error: %v", err)
-	}
+// 	if err != nil {
+// 		t.Errorf("Init() returned an error: %v", err)
+// 	}
 
-	nameFlag := cmd.flags.Lookup("name").Value.String()
+// 	nameFlag := cmd.flags.Lookup("name").Value.String()
 
-	if nameFlag != "your name" {
-		t.Errorf("Init() did not properly parse flag 'name'. Got = %q, want = %q", nameFlag, "your name")
-	}
+// 	if nameFlag != "your name" {
+// 		t.Errorf("Init() did not properly parse flag 'name'. Got = %q, want = %q", nameFlag, "your name")
+// 	}
 
-}
+// }
 
 func TestCommandCalled(t *testing.T) {
 	cmd := &BaseCommand{
@@ -164,5 +169,53 @@ func TestListCommands(t *testing.T) {
 
 	if output != expectedOutput {
 		t.Errorf("ListCommands() output mismatch.\nGot:\n%q\nWant:\n%q", bufferOut.String(), expectedOutput)
+	}
+}
+
+func TestCommandInit(t *testing.T) {
+	tests := []struct {
+		name        string
+		args        []string
+		expectedOut string
+		expectedErr bool
+	}{
+		{
+			name:        "valid flag name",
+			args:        []string{"-name", "your name"},
+			expectedOut: "your name",
+		},
+		{
+			name:        "missing flag name",
+			args:        []string{},
+			expectedErr: false,
+		},
+		{
+			name:        "invalid flag name",
+			args:        []string{"-invalid"},
+			expectedErr: true,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+
+			cmd := &BaseCommand{
+				flags: flag.NewFlagSet("tester", flag.ContinueOnError),
+			}
+
+			cmd.flags.String("name", "", "a test of string flag")
+
+			err := cmd.Init(testCase.args)
+
+			if testCase.expectedErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+
+			nameFlag := cmd.flags.Lookup("name").Value.String()
+			assert.Equal(t, testCase.expectedOut, nameFlag)
+		})
 	}
 }
