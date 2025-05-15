@@ -10,49 +10,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	// "github.com/bbland1/goDo/task"
+
 )
-
-func TestCommandRun(t *testing.T) {
-	var executed bool
-	var passedArgs []string
-
-	cmd := &BaseCommand{
-		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string) {
-			executed = true
-			passedArgs = args
-		},
-	}
-
-	cmd.flags.String("name", "", "a test of string flag")
-
-	sampleArgs := []string{"-name", "your name", "extra", "non-flag", "args"}
-
-	err := cmd.Init(sampleArgs)
-	if err != nil {
-		t.Errorf("Init() returned an error: %v", err)
-	}
-
-	cmd.Run()
-
-	if !executed {
-		t.Errorf("Run() should execute the command, but executed = %t", executed)
-	}
-
-	expectedArgs := []string{"extra", "non-flag", "args"}
-	if len(passedArgs) != len(expectedArgs) {
-		t.Errorf("Expected %d arguments, got = %d. Args: %v", len(expectedArgs), len(passedArgs), passedArgs)
-	}
-
-	for i, expected := range expectedArgs {
-		if passedArgs[i] != expected {
-			t.Errorf("Expected arg[%d] to be %q, got %q", i, expected, passedArgs[i])
-		}
-
-	}
-
-}
 
 func TestCommandInit(t *testing.T) {
 	tests := []struct {
@@ -293,7 +252,7 @@ func TestCommandListMethod(t *testing.T) {
 	}
 }
 
-func TestCommandRun9(t *testing.T) {
+func TestCommandRun(t *testing.T) {
 	tests := []struct {
 		name             string
 		args             []string
