@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -8,6 +9,11 @@ import (
 )
 
 var registeredCommands = make(map[string]Command)
+
+var (
+	ErrEmptyCmdName = errors.New("cannot register command with empty name")
+	ErrCommandNil = errors.New("cannot register nil command")
+)
 
 type (
 	// Command interface to define the structure for all CLI commands
@@ -80,8 +86,17 @@ func (tf *TrackedFlags) Get() interface{} {
 	return tf.Value.(flag.Getter).Get()
 }
 
-func RegisterCommand(cmd Command) {
+func RegisterCommand(cmd Command) error {
+	if baseCmd, ok := cmd.(*BaseCommand); ok && baseCmd == nil {
+		return ErrCommandNil
+	}
+
+	if cmd.GetName() == "" {
+		return ErrEmptyCmdName
+	}
+
 	registeredCommands[cmd.GetName()] = cmd
+	return nil
 }
 
 func ClearCommandRegistry() {

@@ -24,6 +24,7 @@ func main() {
 
 	// register the commands to be used manually
 	// todo: maybe move to the init once make sure new command logic works for all
+	// todo: would registering this parallel be the next step?
 	cmd.RegisterCommand(cmd.NewHelpCommand(os.Stdout, os.Stderr, &exitCode))
 	cmd.RegisterCommand(cmd.NewVersionCommand(os.Stdout, os.Stderr, &exitCode))
 	cmd.RegisterCommand(cmd.NewAddCommand(os.Stdout, os.Stderr, db, &exitCode))

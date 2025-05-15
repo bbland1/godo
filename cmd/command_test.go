@@ -11,55 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	// "github.com/bbland1/goDo/task"
-	// "github.com/stretchr/testify/require"
 )
-
-// func TestCommandInit(t *testing.T) {
-// 	cmd := &BaseCommand{
-// 		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-// 	}
-
-// 	cmd.flags.String("name", "", "a test of string flag")
-
-// 	sampleArgs := []string{"-name", "your name"}
-
-// 	err := cmd.Init(sampleArgs)
-
-// 	if err != nil {
-// 		t.Errorf("Init() returned an error: %v", err)
-// 	}
-
-// 	nameFlag := cmd.flags.Lookup("name").Value.String()
-
-// 	if nameFlag != "your name" {
-// 		t.Errorf("Init() did not properly parse flag 'name'. Got = %q, want = %q", nameFlag, "your name")
-// 	}
-
-// }
-
-func TestCommandCalled(t *testing.T) {
-	cmd := &BaseCommand{
-		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-	}
-
-	cmd.flags.String("name", "", "a test of string flag")
-
-	if cmd.Called() {
-		t.Errorf("Called() should return false if method is before Init(), got= %t", cmd.Called())
-	}
-
-	sampleArgs := []string{"-name", "your name"}
-
-	err := cmd.Init(sampleArgs)
-	if err != nil {
-		t.Errorf("Init() returned an error: %v", err)
-	}
-
-	if !cmd.Called() {
-		t.Errorf("Called() should return true if after Init() is called, got= %t", cmd.Called())
-	}
-
-}
 
 func TestCommandRun(t *testing.T) {
 	var executed bool
@@ -100,30 +52,6 @@ func TestCommandRun(t *testing.T) {
 
 	}
 
-}
-
-func TestRegisterCommand(t *testing.T) {
-	testCmd := &BaseCommand{
-		name:        "tester",
-		description: "a tester command",
-		flags:       flag.NewFlagSet("test", flag.ContinueOnError),
-		execute:     func(cmd *BaseCommand, args []string) {},
-	}
-
-	RegisterCommand(testCmd)
-
-	retrievedCmd, exists := GetCommand("tester")
-	if !exists {
-		t.Fatalf("Expected command 'tester' to be registered, but it was not.")
-	}
-
-	if retrievedCmd.GetName() != "tester" {
-		t.Errorf("Expected command name to be 'mock', got %q", retrievedCmd.GetName())
-	}
-
-	if retrievedCmd.GetDescription() != "a tester command" {
-		t.Errorf("Expected description to be 'Mock command for testing', got %q", retrievedCmd.GetDescription())
-	}
 }
 
 func TestGetCommand_NotFOund(t *testing.T) {
@@ -199,13 +127,13 @@ func TestCommandInit(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 
-			cmd := &BaseCommand{
+			testCmd := &BaseCommand{
 				flags: flag.NewFlagSet("tester", flag.ContinueOnError),
 			}
 
-			cmd.flags.String("name", "", "a test of string flag")
+			testCmd.flags.String("name", "", "a test of string flag")
 
-			err := cmd.Init(testCase.args)
+			err := testCmd.Init(testCase.args)
 
 			if testCase.expectedErr {
 				require.Error(t, err)
@@ -214,8 +142,138 @@ func TestCommandInit(t *testing.T) {
 
 			require.NoError(t, err)
 
-			nameFlag := cmd.flags.Lookup("name").Value.String()
+			nameFlag := testCmd.flags.Lookup("name").Value.String()
 			assert.Equal(t, testCase.expectedOut, nameFlag)
+		})
+	}
+}
+
+func TestCommandCalled(t *testing.T) {
+	tests := []struct {
+		name        string
+		args        []string
+		expectedOut bool
+		expectedErr bool
+	}{
+		{
+			name:        "valid called response",
+			args:        []string{"-name", "your name"},
+			expectedOut: true,
+			expectedErr: false,
+		},
+		{
+			name:        "called method done before init",
+			args:        []string{"-name", "your name"},
+			expectedOut: false,
+			expectedErr: true,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			testCmd := &BaseCommand{
+				flags: flag.NewFlagSet("tester", flag.ContinueOnError),
+			}
+
+			testCmd.flags.String("name", "", "a test of string flag")
+
+			if testCase.expectedErr {
+				require.Equal(t, testCase.expectedOut, testCmd.Called())
+				return
+			}
+
+			err := testCmd.Init(testCase.args)
+
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expectedOut, testCmd.Called())
+		})
+	}
+}
+
+func TestCommandRegistration(t *testing.T) {
+	tests := []struct {
+		name         string
+		command      *BaseCommand
+		register     bool
+		expectExists bool
+		expectedErr error
+	}{
+		{
+			name: "command is registered properly",
+			command: &BaseCommand{
+				name:        "tester",
+				description: "a test command",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     true,
+			expectExists: true,
+		},
+		{
+			name: "called method before init",
+			command: &BaseCommand{
+				name:        "tester",
+				description: "a test command",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     false,
+			expectExists: false,
+		},
+		{
+			name: "get unregistered command",
+			command: &BaseCommand{
+				name:        "unknown",
+				description: "a test command",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     false,
+			expectExists: false,
+		},
+		{
+			name: "empty command name",
+			command: &BaseCommand{
+				name:        "",
+				description: "no name",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     true,
+			expectExists: false,
+			expectedErr:  ErrEmptyCmdName,
+		},
+		{
+			name:         "nil passed to command",
+			command:      nil,
+			register:     true,
+			expectExists: false,
+			expectedErr:  ErrCommandNil,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			ClearCommandRegistry()
+
+			var err error
+			if testCase.register {
+				err = RegisterCommand(testCase.command)
+				assert.ErrorIs(t, err, testCase.expectedErr)
+			}
+
+			var cmdName string
+			if testCase.command != nil {
+				cmdName = testCase.command.name
+			}
+
+			retrievedCmd, exists := GetCommand(cmdName)
+			assert.Equal(t, testCase.expectExists, exists)
+
+			if testCase.expectExists {
+				assert.Equal(t, testCase.command.GetName(), retrievedCmd.GetName())
+				assert.Equal(t, testCase.command.GetDescription(), retrievedCmd.GetDescription())
+			}
 		})
 	}
 }
