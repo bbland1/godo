@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"sort"
 	"text/tabwriter"
 )
 
@@ -20,7 +21,6 @@ const Greeting = `welcome to goDo your todo list in the terminal allowing you to
 to learn more about how to use:
 	goDo help`
 
-
 // Prints the UserManual to the terminal to show user how to use app
 func DisplayUserManual(w io.Writer) int {
 	tw := tabwriter.NewWriter(w, 0, 8, 2, ' ', 0)
@@ -32,7 +32,15 @@ func DisplayUserManual(w io.Writer) int {
 	fmt.Fprintln(tw, "  -verbose\tPrint detailed output when available")
 	fmt.Fprintln(tw, "\nCommands:")
 
-	for _, cmd := range registeredCommands {
+	// consistently display the actually command values
+	var names []string
+	for name := range registeredCommands {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	for _, name := range names {
+		cmd := registeredCommands[name]
 		fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())
 	}
 
@@ -49,11 +57,11 @@ func DisplayGreeting(w io.Writer) int {
 // NewHelpCommand is called to pull up the usage or userManual of how to use goDo
 func NewHelpCommand(stdout, stderr io.Writer, exitCode *int) *BaseCommand {
 	command := &BaseCommand{
-		name: "help",
+		name:        "help",
 		description: "show this message with an overview of all options and commands",
-		flags: flag.NewFlagSet("help", flag.ExitOnError),
-		output: stdout,
-		errOutput: stderr,
+		flags:       flag.NewFlagSet("help", flag.ExitOnError),
+		output:      stdout,
+		errOutput:   stderr,
 		execute: func(cmd *BaseCommand, args []string) {
 			*exitCode = DisplayUserManual(cmd.output)
 		},

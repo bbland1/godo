@@ -7,162 +7,314 @@ import (
 	"strings"
 	"testing"
 	"text/tabwriter"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 )
 
 func TestCommandInit(t *testing.T) {
-	cmd := &BaseCommand{
-		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-	}
-
-	cmd.flags.String("name", "", "a test of string flag")
-
-	sampleArgs := []string{"-name", "your name"}
-
-	err := cmd.Init(sampleArgs)
-
-	if err != nil {
-		t.Errorf("Init() returned an error: %v", err)
-	}
-
-	nameFlag := cmd.flags.Lookup("name").Value.String()
-
-	if nameFlag != "your name" {
-		t.Errorf("Init() did not properly parse flag 'name'. Got = %q, want = %q", nameFlag, "your name")
-	}
-
-}
-
-func TestCommandCalled(t *testing.T) {
-	cmd := &BaseCommand{
-		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-	}
-
-	cmd.flags.String("name", "", "a test of string flag")
-
-	if cmd.Called() {
-		t.Errorf("Called() should return false if method is before Init(), got= %t", cmd.Called())
-	}
-
-	sampleArgs := []string{"-name", "your name"}
-
-	err := cmd.Init(sampleArgs)
-	if err != nil {
-		t.Errorf("Init() returned an error: %v", err)
-	}
-
-	if !cmd.Called() {
-		t.Errorf("Called() should return true if after Init() is called, got= %t", cmd.Called())
-	}
-
-}
-
-func TestCommandRun(t *testing.T) {
-	var executed bool
-	var passedArgs []string
-
-	cmd := &BaseCommand{
-		flags: flag.NewFlagSet("tester", flag.ContinueOnError),
-		execute: func(cmd *BaseCommand, args []string) {
-			executed = true
-			passedArgs = args
+	tests := []struct {
+		name        string
+		args        []string
+		expectedOut string
+		expectedErr bool
+	}{
+		{
+			name:        "valid flag name",
+			args:        []string{"-name", "your name"},
+			expectedOut: "your name",
+		},
+		{
+			name:        "missing flag name",
+			args:        []string{},
+			expectedErr: false,
+		},
+		{
+			name:        "invalid flag name",
+			args:        []string{"-invalid"},
+			expectedErr: true,
 		},
 	}
 
-	cmd.flags.String("name", "", "a test of string flag")
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
 
-	sampleArgs := []string{"-name", "your name", "extra", "non-flag", "args"}
+			testCmd := &BaseCommand{
+				flags: flag.NewFlagSet("tester", flag.ContinueOnError),
+			}
 
-	err := cmd.Init(sampleArgs)
-	if err != nil {
-		t.Errorf("Init() returned an error: %v", err)
-	}
+			testCmd.flags.String("name", "", "a test of string flag")
 
-	cmd.Run()
+			err := testCmd.Init(testCase.args)
 
-	if !executed {
-		t.Errorf("Run() should execute the command, but executed = %t", executed)
-	}
+			if testCase.expectedErr {
+				require.Error(t, err)
+				return
+			}
 
-	expectedArgs := []string{"extra", "non-flag", "args"}
-	if len(passedArgs) != len(expectedArgs) {
-		t.Errorf("Expected %d arguments, got = %d. Args: %v", len(expectedArgs), len(passedArgs), passedArgs)
-	}
+			require.NoError(t, err)
 
-	for i, expected := range expectedArgs {
-		if passedArgs[i] != expected {
-			t.Errorf("Expected arg[%d] to be %q, got %q", i, expected, passedArgs[i])
-		}
-
-	}
-
-}
-
-func TestRegisterCommand(t *testing.T) {
-	testCmd := &BaseCommand{
-		name:        "tester",
-		description: "a tester command",
-		flags:       flag.NewFlagSet("test", flag.ContinueOnError),
-		execute:     func(cmd *BaseCommand, args []string) {},
-	}
-
-	RegisterCommand(testCmd)
-
-	retrievedCmd, exists := GetCommand("tester")
-	if !exists {
-		t.Fatalf("Expected command 'tester' to be registered, but it was not.")
-	}
-
-	if retrievedCmd.GetName() != "tester" {
-		t.Errorf("Expected command name to be 'mock', got %q", retrievedCmd.GetName())
-	}
-
-	if retrievedCmd.GetDescription() != "a tester command" {
-		t.Errorf("Expected description to be 'Mock command for testing', got %q", retrievedCmd.GetDescription())
+			nameFlag := testCmd.flags.Lookup("name").Value.String()
+			assert.Equal(t, testCase.expectedOut, nameFlag)
+		})
 	}
 }
 
-func TestGetCommand_NotFOund(t *testing.T) {
-	_, exists := GetCommand("fake")
-	if exists {
-		t.Errorf("GetCommand() should return false for an unregistered command, but it returned true.")
+func TestCommandCalled(t *testing.T) {
+	tests := []struct {
+		name        string
+		args        []string
+		expectedOut bool
+		expectedErr bool
+	}{
+		{
+			name:        "valid called response",
+			args:        []string{"-name", "your name"},
+			expectedOut: true,
+			expectedErr: false,
+		},
+		{
+			name:        "called method done before init",
+			args:        []string{"-name", "your name"},
+			expectedOut: false,
+			expectedErr: true,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			testCmd := &BaseCommand{
+				flags: flag.NewFlagSet("tester", flag.ContinueOnError),
+			}
+
+			testCmd.flags.String("name", "", "a test of string flag")
+
+			if testCase.expectedErr {
+				require.Equal(t, testCase.expectedOut, testCmd.Called())
+				return
+			}
+
+			err := testCmd.Init(testCase.args)
+
+			assert.NoError(t, err)
+			assert.Equal(t, testCase.expectedOut, testCmd.Called())
+		})
 	}
 }
 
-func TestListCommands(t *testing.T) {
-	registeredCommands = make(map[string]Command)
+func TestCommandRegistration(t *testing.T) {
+	tests := []struct {
+		name         string
+		command      *BaseCommand
+		register     bool
+		expectExists bool
+		expectedErr  error
+	}{
+		{
+			name: "command is registered properly",
+			command: &BaseCommand{
+				name:        "tester",
+				description: "a test command",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     true,
+			expectExists: true,
+		},
+		{
+			name: "called method before init",
+			command: &BaseCommand{
+				name:        "tester",
+				description: "a test command",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     false,
+			expectExists: false,
+		},
+		{
+			name: "get unregistered command",
+			command: &BaseCommand{
+				name:        "unknown",
+				description: "a test command",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     false,
+			expectExists: false,
+		},
+		{
+			name: "empty command name",
+			command: &BaseCommand{
+				name:        "",
+				description: "no name",
+				flags:       flag.NewFlagSet("test", flag.ContinueOnError),
+				execute:     func(cmd *BaseCommand, args []string) {},
+			},
+			register:     true,
+			expectExists: false,
+			expectedErr:  ErrEmptyCmdName,
+		},
+		{
+			name:         "nil passed to command",
+			command:      nil,
+			register:     true,
+			expectExists: false,
+			expectedErr:  ErrCommandNil,
+		},
+	}
 
-	RegisterCommand(&BaseCommand{
-		name:        "cmd1",
-		description: "command 1",
-		flags:       flag.NewFlagSet("cmd1", flag.ContinueOnError),
-		execute:     func(cmd *BaseCommand, args []string) {},
-	})
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			ClearCommandRegistry()
 
-	RegisterCommand(&BaseCommand{
-		name:        "cmd2",
-		description: "command 2",
-		flags:       flag.NewFlagSet("cmd2", flag.ContinueOnError),
-		execute:     func(cmd *BaseCommand, args []string) {},
-	})
+			var err error
+			if testCase.register {
+				err = RegisterCommand(testCase.command)
+				assert.ErrorIs(t, err, testCase.expectedErr)
+			}
 
-	var bufferOut bytes.Buffer
+			var cmdName string
+			if testCase.command != nil {
+				cmdName = testCase.command.name
+			}
 
-	ListCommands(&bufferOut)
+			retrievedCmd, exists := GetCommand(cmdName)
+			assert.Equal(t, testCase.expectExists, exists)
 
-	var bufferExpectedOutput bytes.Buffer
+			if testCase.expectExists {
+				assert.Equal(t, testCase.command.GetName(), retrievedCmd.GetName())
+				assert.Equal(t, testCase.command.GetDescription(), retrievedCmd.GetDescription())
+			}
+		})
+	}
+}
 
-	tw := tabwriter.NewWriter(&bufferExpectedOutput, 0, 8, 2, ' ', 0)
+func TestCommandListMethod(t *testing.T) {
+	tests := []struct {
+		name           string
+		commands       []*BaseCommand
+		expectedOutput string
+	}{
+		{
+			name: "multiple commands",
+			commands: []*BaseCommand{
+				{
+					name:        "cmd1",
+					description: "command 1",
+					flags:       flag.NewFlagSet("cmd1", flag.ContinueOnError),
+					execute:     func(cmd *BaseCommand, args []string) {},
+				},
+				{
+					name:        "cmd2",
+					description: "command 2",
+					flags:       flag.NewFlagSet("cmd2", flag.ContinueOnError),
+					execute:     func(cmd *BaseCommand, args []string) {},
+				},
+			},
+		},
+		{
+			name:     "no commands",
+			commands: []*BaseCommand{},
+		},
+	}
 
-	fmt.Fprintln(tw, "commands:")
-	fmt.Fprintln(tw, "  cmd1\t- command 1")
-	fmt.Fprintln(tw, "  cmd2\t- command 2")
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			ClearCommandRegistry()
 
-	tw.Flush()
+			for _, cmd := range testCase.commands {
+				err := RegisterCommand(cmd)
+				require.NoError(t, err)
+			}
 
-	output := strings.TrimSpace(bufferOut.String())
-	expectedOutput := strings.TrimSpace(bufferExpectedOutput.String())
+			var bufferOut bytes.Buffer
+			ListCommands(&bufferOut)
 
-	if output != expectedOutput {
-		t.Errorf("ListCommands() output mismatch.\nGot:\n%q\nWant:\n%q", bufferOut.String(), expectedOutput)
+			var bufferExpectedOutput bytes.Buffer
+
+			tw := tabwriter.NewWriter(&bufferExpectedOutput, 0, 8, 2, ' ', 0)
+
+			fmt.Fprintln(tw, "commands:")
+			for _, cmd := range testCase.commands {
+				fmt.Fprintf(tw, "  %s\t- %s\n", cmd.GetName(), cmd.GetDescription())
+
+			}
+
+			tw.Flush()
+
+			expected := strings.TrimSpace(bufferExpectedOutput.String())
+			actual := strings.TrimSpace(bufferOut.String())
+
+			assert.Equal(t, expected, actual)
+		})
+	}
+}
+
+func TestCommandRun(t *testing.T) {
+	tests := []struct {
+		name             string
+		args             []string
+		expectedArgs     []string
+		expectedExecuted bool
+		expectedErr      bool
+		errorContains    string
+	}{
+		{
+			name:             "valid flags and positional args",
+			args:             []string{"-name", "your name", "extra", "non-flag", "args"},
+			expectedArgs:     []string{"extra", "non-flag", "args"},
+			expectedExecuted: true,
+			expectedErr:      false,
+		},
+		{
+			name:             "only flags, no positional args",
+			args:             []string{"-name", "value"},
+			expectedArgs:     []string{},
+			expectedExecuted: true,
+			expectedErr:      false,
+		},
+		{
+			name:             "missing flag value",
+			args:             []string{"-name"},
+			expectedArgs:     nil,
+			expectedExecuted: false, 
+			expectedErr:      true, 
+			errorContains:    "flag needs an argument",
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			var executed bool
+			var passedArgs []string
+
+			testCmd := &BaseCommand{
+				flags: flag.NewFlagSet("tester", flag.ContinueOnError),
+				execute: func(cmd *BaseCommand, args []string) {
+					executed = true
+					passedArgs = args
+				},
+			}
+
+			testCmd.flags.String("name", "", "a test of string flag")
+
+			err := testCmd.Init(testCase.args)
+			if testCase.expectedErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), testCase.errorContains)
+			} else {
+				assert.NoError(t, err)
+				testCmd.Run()
+			}
+
+
+			assert.Equal(t, testCase.expectedExecuted, executed)
+
+			if testCase.expectedExecuted {
+				assert.Equal(t, testCase.expectedArgs, passedArgs)
+			}
+		})
 	}
 }
